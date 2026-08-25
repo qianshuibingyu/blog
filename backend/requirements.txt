@@ -1,0 +1,18 @@
+# Django 后端和 REST API
+Django==5.2.17
+djangorestframework==3.18.0
+
+# 环境变量配置
+python-dotenv==1.2.3
+
+# Markdown 解析和安全渲染
+Markdown==3.10.3
+bleach==6.4.0
+
+# 向量数据库和模型服务
+chromadb==1.5.9
+openai==3.3.1
+
+# 测试
+pytest==9.1.1
+pytest-django==4.14.0
