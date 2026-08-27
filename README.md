@@ -2,7 +2,16 @@
 
 个人技术知识库与智能问答平台。普通用户可以创建和提交自己的 Markdown 文章、阅读公开内容并发表评论；管理员负责账号和内容审核。只有审核通过且索引成功的文章才进入公开展示和 Chroma 知识库问答。
 
-> 当前仓库已具备 Django 后端骨架、Vue 3 + Vite 前端和 Day 1 Health 联调链路。文章、评论、审核、索引和知识问答业务仍按 Phase 1 计划逐步实现。项目级技术规则统一维护在开发规范中，Day 1 的任务清单仍以计划文档为准。
+> 当前仓库已完成 Day 2 的 Article 模型、SQLite migration、Django Admin、公开文章列表/详情 API 和 Vue 前台读取链路。评论、审核、文章写入、索引和知识问答仍按后续计划实现。
+
+## 当前进度
+
+- Day 1：项目骨架、登录基础能力和 Health 联调已完成
+- Day 2 Phase 1：Article 模型、SQLite 表和 migration 已完成
+- Day 2 Phase 2：Django Admin 文章管理已完成
+- Day 2 Phase 3：公开文章列表和详情 API 已完成
+- Day 2 Phase 4：Vue 文章列表、详情和请求状态已完成
+- Day 2 Phase 5：自动化测试、删除流程验证和 Git 提交仍待补充
 
 ## 文档入口
 
@@ -328,10 +337,10 @@ pnpm dev --host 127.0.0.1
 
 ```env
 VITE_API_BASE_URL=/api
-VITE_USE_MOCKS=true
+VITE_USE_MOCKS=false
 ```
 
-真实文章 API 完成后，再将 `VITE_USE_MOCKS` 改为 `false`。
+前端文章列表和详情使用 Django API；知识问答页面仍保留 mock 逻辑，直到后续知识库接口完成。
 
 ### Health
 
@@ -355,7 +364,7 @@ VITE_USE_MOCKS=true
 
 ### 当前接口基线
 
-项目开发规范定义以下 Phase 1 接口；Day 1 只实现 health，其余接口在后续阶段实现：
+项目开发规范定义以下 Phase 1 接口；Day 2 已实现公开文章读取接口，其余写入、审核和知识库接口仍在后续阶段实现：
 
 | 方法 | 路径 | 用途 | 登录要求 |
 | --- | --- | --- | --- |

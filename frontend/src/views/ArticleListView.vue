@@ -1,23 +1,21 @@
 <script setup>
-import { computed, onMounted, ref } from "vue"
+import { onMounted, ref } from "vue"
 import { RouterLink } from "vue-router"
 import ArticleRow from "../components/ArticleRow.vue"
 import { getArticles } from "../api/articles"
 
 const articles = ref([])
 const loading = ref(true)
-const activeCategory = ref("全部")
-
-const categories = ["全部", "开发记录", "后端实践", "产品思考", "关于本站"]
-
-const visibleArticles = computed(() => {
-  if (activeCategory.value === "全部") return articles.value
-  return articles.value.filter((article) => article.category === activeCategory.value)
-})
+const error = ref("")
 
 onMounted(async () => {
-  articles.value = await getArticles()
-  loading.value = false
+  try{
+    articles.value = await getArticles()
+  }catch(requestError){
+    error.value = "文章加载失败，请稍后重试。"
+  }finally{
+    loading.value = false
+  }
 })
 </script>
 
@@ -49,22 +47,15 @@ onMounted(async () => {
             <span class="blog-kicker">文章</span>
             <h2>最近写了什么</h2>
           </div>
-          <span class="post-total">{{ visibleArticles.length }} 篇</span>
-        </div>
-
-        <div class="category-tabs" aria-label="文章分类">
-          <button
-            v-for="category in categories"
-            :key="category"
-            type="button"
-            :class="{ active: activeCategory === category }"
-            @click="activeCategory = category"
-          >{{ category }}</button>
+          <span class="post-total">{{ articles.length }} 篇</span>
         </div>
 
         <div v-if="loading" class="empty-state">正在加载文章……</div>
-        <div v-else-if="visibleArticles.length" class="article-list blog-article-list">
-          <ArticleRow v-for="(article, index) in visibleArticles" :key="article.id" :article="article" :class="`note-note-${(index % 4) + 1}`" />
+        <div v-else-if="error" class="empty-state">
+          {{ error }}
+        </div>
+        <div v-else-if="articles.length" class="article-list blog-article-list">
+          <ArticleRow v-for="(article, index) in articles" :key="article.id" :article="article" :class="`note-note-${(index % 4) + 1}`" />
         </div>
         <div v-else class="empty-state">这个分类暂时还没有文章。</div>
       </main>
@@ -74,24 +65,6 @@ onMounted(async () => {
           <h3>关于这个博客</h3>
           <p>OwnerBlog 是我的公开笔记本。这里会留下开发记录、技术实践、产品思考，也会留下还没有想明白的问题。</p>
           <RouterLink class="text-link" to="/articles/1">先读读这篇介绍 <span>↗</span></RouterLink>
-        </section>
-
-        <section class="sidebar-block">
-          <h3>分类</h3>
-          <ul class="sidebar-list">
-            <li v-for="category in categories.slice(1)" :key="category">
-              <button type="button" @click="activeCategory = category; document.querySelector('#articles')?.scrollIntoView({ behavior: 'smooth' })">
-                <span>{{ category }}</span><span>{{ articles.filter((article) => article.category === category).length }}</span>
-              </button>
-            </li>
-          </ul>
-        </section>
-
-        <section class="sidebar-block">
-          <h3>标签</h3>
-          <div class="tag-cloud">
-            <span v-for="tag in [...new Set(articles.flatMap((article) => article.tags || []))]" :key="tag">#{{ tag }}</span>
-          </div>
         </section>
 
         <section class="sidebar-block sidebar-quiet">

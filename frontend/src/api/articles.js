@@ -6,11 +6,11 @@ const useMocks = import.meta.env.VITE_USE_MOCKS !== "false"
 export async function getArticles() {
   if (useMocks) return mockArticles
   const { data } = await apiClient.get("/articles")
-  return data.results || data
+  return data.items || []
 }
 
 export async function getArticle(id) {
-  if (useMocks) return mockArticles.find((article) => String(article.id) === String(id))
+  if (useMocks) return mockArticles.find((article) => String(article.id) === String(id),)
   const { data } = await apiClient.get(`/articles/${id}`)
   return data
 }
