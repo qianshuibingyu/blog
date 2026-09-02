@@ -11,7 +11,7 @@
 - Day 2 Phase 2：Django Admin 文章管理已完成
 - Day 2 Phase 3：公开文章列表和详情 API 已完成
 - Day 2 Phase 4：Vue 文章列表、详情和请求状态已完成
-- Day 2 Phase 5：自动化测试、删除流程验证和 Git 提交仍待补充
+- Day 2 Phase 5：自动化测试已完成；删除流程和测试数据数量需要重新人工验收
 
 ## 文档入口
 
@@ -43,7 +43,7 @@
 
 当前尚未创建或完成：
 
-- User、Article、Comment、ArticleChunk 数据模型和权限
+- User、Comment、ArticleChunk 数据模型和权限
 - 用户认证、投稿、管理员审核和评论流程
 - Chroma 索引、embedding 和知识库问答
 
@@ -517,7 +517,7 @@ python manage.py runserver --noreload
 1. 创建 Django 项目和 `accounts`、`articles`、`comments`、`knowledge` App。
 2. 实现 `GET /api/health`。
 3. 创建 Vue 3 + Vite 页面并联调 health。
-4. 创建 User、Article、Comment、ArticleChunk 模型和 migrations。
+4. 创建 User、Comment、ArticleChunk 模型和 migrations。
 5. 实现登录、Session/CSRF 和对象级权限；注册接口保留为 Future，不在 Phase 1 实现。
 6. 实现普通用户文章投稿、本人编辑/删除和提交审核。
 7. 实现管理员文章/评论审核、下架、删除和账号管理。

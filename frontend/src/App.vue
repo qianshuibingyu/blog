@@ -1,9 +1,8 @@
 <script setup>
-import { onMounted, ref } from "vue"
+import { onMounted } from "vue"
 import { RouterLink, RouterView } from "vue-router"
 import { getCurrentUser, logout } from "./api/auth"
-
-const currentUser = ref(null)
+import { currentUser } from "./stores/authState"
 
 onMounted(async () => {
   try {
@@ -14,7 +13,9 @@ onMounted(async () => {
 })
 
 async function signOut() {
+  //请求后端清理 Session
   await logout()
+  //清空共享状态，让页面立即显示登录入口
   currentUser.value = null
 }
 
@@ -50,7 +51,9 @@ const particles = Array.from({ length: 34 }, (_, index) => ({
         <RouterLink to="/knowledge">问答</RouterLink>
       </nav>
       <div v-if="currentUser" class="account-actions">
-        <span class="account-name">{{ currentUser.username }}</span>
+        <RouterLink class="account-name" to="/my-articles">
+          {{ currentUser.username }}
+        </RouterLink>
         <button class="text-button" type="button" @click="signOut">退出</button>
       </div>
       <RouterLink v-else class="text-button login-link" to="/login">登录</RouterLink>

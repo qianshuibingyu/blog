@@ -18,7 +18,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from config.views import health_view
-from articles.views import (ArticleDetailAPIView, ArticleListAPIView,)
+from articles.views import (
+    ArticleCollectionAPIView,
+    ArticleItemAPIView,
+    ArticleSubmitReviewAPIView,
+    MyArticleListAPIView,
+)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -26,12 +31,22 @@ urlpatterns = [
     path("api/auth/", include("accounts.urls")),
     path(
         "api/articles",
-        ArticleListAPIView.as_view(),
-        name="article-list",
+        ArticleCollectionAPIView.as_view(),
+        name="article-collection",
     ),
     path(
         "api/articles/<int:pk>",
-        ArticleDetailAPIView.as_view(),
-        name="article-detail",
+        ArticleItemAPIView.as_view(),
+        name="article-item",
     ),
+    path(
+        "api/my-articles",
+        MyArticleListAPIView.as_view(),
+        name="my-article-list",
+    ),
+    path(
+        "api/articles/<int:pk>/submit-review",
+        ArticleSubmitReviewAPIView.as_view(),
+        name="article-submit-review",
+    )
 ]

@@ -14,3 +14,9 @@ export async function getCurrentUser() {
   const { data } = await apiClient.get("/auth/me")
   return data
 }
+
+//请求 Django 设置 csrftoken Cookie
+export async function getCsrfToken(){
+  const {data} = await apiClient.get("/auth/csrf")
+  return data
+}

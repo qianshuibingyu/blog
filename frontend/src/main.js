@@ -7,6 +7,7 @@ import KnowledgeView from "./views/KnowledgeView.vue"
 import LoginView from "./views/LoginView.vue"
 import "./styles/global.css"
 import HealthView from "./views/HealthView.vue"
+import MyArticlesView from "./views/MyArticlesView.vue"
 
 const router = createRouter({
   history: createWebHistory(),
@@ -16,6 +17,7 @@ const router = createRouter({
     { path: "/knowledge", component: KnowledgeView },
     { path: "/login", component: LoginView },
     { path: "/health", component: HealthView },
+    { path: "/my-articles", component: MyArticlesView},
   ],
 })
 

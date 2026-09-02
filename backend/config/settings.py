@@ -149,3 +149,6 @@ CSRF_TRUSTED_ORIGINS = [
     ).split(",")
     if origin.strip()
 ]
+
+CSRF_COOKIE_NAME = "csrftoken"
+SCRF_HEADER_NAME = "HTTP_X_CSRFTOKEN"

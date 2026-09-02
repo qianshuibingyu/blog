@@ -23,3 +23,24 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
             "content",
             "published_at",
         )
+
+class MyArticleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Article
+        fields = (
+            "id",
+            "title",
+            "summary",
+            "content",
+            "status",
+            "created_at",
+            "updated_at",
+            "published_at",
+        )
+        read_only_fields = (
+            "id",
+            "status",
+            "created_at",
+            "updated_at",
+            "published_at",
+        )

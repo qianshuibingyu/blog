@@ -210,6 +210,35 @@ section { margin-top: 74px; }
 .login-error { margin: 8px 0 0; color: #9b3f4c; font-size: 13px; }
 @media (max-width: 560px) { .site-nav a.router-link-active { padding-bottom: 5px; } .account-actions { gap: 9px; } .account-name { max-width: 70px; overflow: hidden; text-overflow: ellipsis; } .login-panel { margin-top: 55px; } }
 
+/* 个人中心布局、状态标签和文章操作。 */
+.my-articles-page { padding: 54px 0 100px; }
+.my-articles-header { max-width: 700px; margin: 70px 0 54px; }
+.my-articles-header h1 { margin: 16px 0 18px; color: var(--ink); font-size: clamp(48px, 7vw, 78px); line-height: .95; }
+.my-articles-header p:last-child { max-width: 520px; margin: 0; color: #536b82; line-height: 1.7; }
+.article-editor { max-width: 760px; border-top: 1px solid var(--ink); padding-top: 24px; }
+.article-editor .section-heading, .my-article-list .section-heading { justify-content: space-between; }
+.section-heading h2 { margin: 0; color: var(--ink); font: 400 34px/1 Newsreader, Georgia, serif; }
+.line-button { border: 0; border-bottom: 1px solid var(--accent); padding: 0 0 4px; background: transparent; color: var(--accent); cursor: pointer; font-size: 12px; }
+.line-button:disabled { cursor: wait; opacity: .55; }
+.article-form { display: grid; gap: 10px; margin-top: 24px; }
+.article-form label { color: #536b82; font: 11px "DM Mono", monospace; }
+.article-form input, .article-form textarea { width: 100%; border: 0; border-bottom: 1px solid var(--line); outline: 0; background: rgba(255, 255, 255, .28); color: var(--ink); padding: 12px 10px; font-size: 16px; }
+.article-form textarea { resize: vertical; line-height: 1.6; }
+.article-form input:focus, .article-form textarea:focus { border-bottom-color: var(--accent); box-shadow: 0 1px 0 var(--accent); }
+.article-form .solid-button { justify-self: start; margin-top: 10px; color: #fff; }
+.my-article-list { margin-top: 76px; }
+.my-article-item { display: flex; justify-content: space-between; gap: 32px; border-top: 1px solid var(--line); padding: 26px 0; }
+.my-article-item h3 { margin: 11px 0 8px; color: #1d3449; font: 500 26px/1.15 Newsreader, Georgia, serif; }
+.my-article-item p { max-width: 640px; margin: 0; color: #536b7d; line-height: 1.6; }
+.my-article-meta, .my-article-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.my-article-meta { color: #617789; font: 10px "DM Mono", monospace; }
+.status-label { border: 1px solid currentColor; padding: 4px 7px; }
+.status-draft { color: #60748a; }
+.status-pending_review { color: #9a6b32; }
+.status-published { color: #35736b; }
+.my-article-actions { align-self: center; justify-content: flex-end; min-width: 220px; }
+@media (max-width: 700px) { .my-articles-page { padding-bottom: 70px; } .my-articles-header { margin-top: 52px; } .my-article-item { display: block; } .my-article-actions { justify-content: flex-start; min-width: 0; margin-top: 20px; } }
+
 /* 便签内容的可读性收敛 */
 .blog-hero-main { transform: rotate(-1deg); background: #e5e9eb; box-shadow: 9px 12px 0 rgba(88, 103, 113, .12), 0 10px 24px rgba(48, 62, 71, .10); }
 .blog-hero-main::before, .author-note::before, .blog-article-list .article-row::before, .sidebar-block::before { content: ""; display: block; position: absolute; z-index: 2; opacity: .62; mix-blend-mode: multiply; }

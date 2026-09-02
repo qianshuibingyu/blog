@@ -1,9 +1,11 @@
 <script setup>
 import { ref } from "vue"
-import { RouterLink, useRouter } from "vue-router"
-import { login } from "../api/auth"
+import { RouterLink, useRoute, useRouter } from "vue-router"
+import { getCsrfToken, login } from "../api/auth"
+import { currentUser } from "../stores/authState"
 
 const router = useRouter()
+const route = useRoute()
 const username = ref("")
 const password = ref("")
 const errorMessage = ref("")
@@ -14,8 +16,20 @@ async function submitLogin() {
   submitting.value = true
 
   try {
-    await login(username.value, password.value)
-    router.push("/")
+    await getCsrfToken()
+    const user = await login(
+      username.value,
+      password.value,
+    )
+    //将后端返回的用户信息写回共享状态
+    currentUser.value = user
+    //读取登录前的目标页面，登录后返回原页面。
+    const nextPath = route.query.next
+    const safeNextPath =
+      typeof nextPath === "string" && nextPath.startsWith("/") && !nextPath.startsWith("//")
+        ? nextPath
+        : "/"
+    router.push(safeNextPath)
   } catch (error) {
     errorMessage.value = error.response?.data?.detail || "登录失败，请检查后端服务。"
   } finally {

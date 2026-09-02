@@ -6,6 +6,7 @@ from django.utils import timezone
 # 文章状态定义在 Article 类外部，避免在类定义过程中无法引用 Status。
 class ArticleStatus(models.TextChoices):
     DRAFT = "draft", "草稿"
+    PENDING_REVIEW = "pending_review", "待审核"
     PUBLISHED = "published", "已发布"
 
 

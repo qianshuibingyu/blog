@@ -2,8 +2,8 @@ import json
 
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 
 def _request_data(request):
@@ -13,7 +13,7 @@ def _request_data(request):
         return {}
 
 
-@csrf_exempt
+
 @require_http_methods(["POST"])
 def login_view(request):
     data = _request_data(request)
@@ -35,7 +35,7 @@ def login_view(request):
     })
 
 
-@csrf_exempt
+
 @require_http_methods(["POST"])
 def logout_view(request):
     logout(request)
@@ -52,3 +52,9 @@ def me_view(request):
         "username": request.user.get_username(),
         "is_staff": request.user.is_staff,
     })
+
+
+@ensure_csrf_cookie
+@require_http_methods(["GET"])
+def csrf_view(request):
+    return JsonResponse({"detail": "CSRF cookie set."})
