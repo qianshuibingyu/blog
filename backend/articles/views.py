@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 
-from .models import Article, ArticleStatus
+from .models import Article, ArticleStatus, IndexStatus
 from .serializers import (
     ArticleListSerializer,
     ArticleDetailSerializer,
@@ -21,6 +21,7 @@ class ArticleCollectionAPIView(APIView):
     def get(self, request):
         articles = Article.objects.filter(
             status=ArticleStatus.PUBLISHED,
+            index_status=IndexStatus.INDEXED,
         )
         serializer = ArticleListSerializer(
             articles,
@@ -55,6 +56,7 @@ class ArticleItemAPIView(APIView):
         article = get_object_or_404(
             Article.objects.filter(
                 status=ArticleStatus.PUBLISHED,
+                index_status=IndexStatus.INDEXED,
             ),
             pk=pk,
         )

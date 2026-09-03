@@ -36,6 +36,10 @@ class MyArticleSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "published_at",
+            "submitted_at",
+            "reviewed_at",
+            "index_status",
+            "index_step",
         )
         read_only_fields = (
             "id",
@@ -43,4 +47,8 @@ class MyArticleSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "published_at",
+            "submitted_at",
+            "reviewed_at",
+            "index_status",
+            "index_step",
         )

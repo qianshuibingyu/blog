@@ -2,7 +2,10 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
-from .models import Article, ArticleStatus
+from .models import Article, ArticleStatus, IndexStatus, ModerationEvent
+from notifications.models import Notification
+from .services import approve_article, reject_article
+
 
 # Create your tests here.
 
@@ -25,6 +28,7 @@ class ArticleAPITests(TestCase):
             summary="已发布文章摘要",
             content="# 已发布文章正文",
             status=ArticleStatus.PUBLISHED,
+            index_status=IndexStatus.INDEXED,
         )
 
         #创建一篇草稿文章
@@ -207,3 +211,63 @@ class ArticleAPITests(TestCase):
             f"/api/articles/{self.draft_article.id}"
         )
         self.assertEqual(response.status_code, 404)
+
+    # 验证管理员通过后文章进入索引流程
+    def test_admin_approve_moves_article_to_indexing(self):
+        admin = get_user_model().objects.create_user(
+            username="review-admin",
+            password="password",
+            is_staff=True,
+        )
+        # 把测试文章设置为待审核
+        self.draft_article.status = ArticleStatus.PENDING_REVIEW
+        self.draft_article.save()
+        approve_article(
+            article=self.draft_article,
+            actor=admin,
+        )
+        self.draft_article.refresh_from_db()
+        self.assertEqual(self.draft_article.status, ArticleStatus.INDEXING,)
+        self.assertEqual(self.draft_article.index_status, IndexStatus.INDEXING,)
+        self.assertEqual(self.draft_article.reviewed_by, admin,)
+
+    # 验证普通用户不能审核
+    def test_normal_user_cannot_approve_article(self):
+        self.draft_article.status = ArticleStatus.PENDING_REVIEW
+        self.draft_article.save()
+        with self.assertRaises(PermissionError):
+            approve_article(
+                article=self.draft_article,
+                actor=self.user,
+            )
+        self.draft_article.refresh_from_db()
+        self.assertEqual(self.draft_article.status, ArticleStatus.PENDING_REVIEW)
+
+    # 验证驳回会删除文章并通知作者
+    def test_reject_deletes_article_and_creates_notification(self):
+        # 创建管理员
+        admin = get_user_model().objects.create_user(
+            username="reject-admin",
+            password="password",
+            is_staff=True,
+        )
+        self.draft_article.status = ArticleStatus.PENDING_REVIEW
+        self.draft_article.save()
+        article_id = self.draft_article.id
+        #调用驳回 Service
+        reject_article(
+            article=self.draft_article,
+            actor=admin,
+            reason="需要补充技术细节",
+        )
+        #文章应该被删除
+        self.assertFalse(Article.objects.filter(id=article_id).exists())
+        #审核事件应该保留
+        self.assertTrue(ModerationEvent.objects.filter(object_id=article_id,action="reject",).exists())
+        #作者应该收到通知
+        self.assertTrue(
+            Notification.objects.filter(
+                recipient=self.user,
+                type="article_rejected",
+            ).exists()
+        )
