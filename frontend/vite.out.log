@@ -1,0 +1,10 @@
+
+  VITE v7.3.6  ready in 533 ms
+
+  ➜  Local:   http://127.0.0.1:5173/
+  ➜  press h + enter to show help
+09:18:50 [vite] (client) hmr update /src/styles/global.css
+09:18:50 [vite] (client) hmr update /src/styles/global.css
+09:22:57 [vite] (client) hmr update /src/views/PipelineView.vue
+09:23:01 [vite] (client) hmr update /src/views/PipelineView.vue
+09:23:07 [vite] (client) hmr update /src/views/PipelineView.vue

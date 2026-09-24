@@ -2,25 +2,27 @@
 
 个人技术知识库与智能问答平台。普通用户可以创建和提交自己的 Markdown 文章、阅读公开内容并发表评论；管理员负责账号和内容审核。只有审核通过且索引成功的文章才进入公开展示和 Chroma 知识库问答。
 
-> 当前仓库已完成 Day 2 的 Article 模型、SQLite migration、Django Admin、公开文章列表/详情 API 和 Vue 前台读取链路。评论、审核、文章写入、索引和知识问答仍按后续计划实现。
+> 当前仓库已完成文章模型、数据库 migration、Django Admin、文章公开读取、个人文章草稿管理、提交审核流程和 Vue 前端基础页面。RAG 的数据模型、依赖和配置已准备，但 Markdown 清洗、文本切分、embedding、Chroma 索引、知识问答 API 和审核后的自动发布链路仍待实现。
 
 ## 当前进度
 
 - Day 1：项目骨架、登录基础能力和 Health 联调已完成
-- Day 2 Phase 1：Article 模型、SQLite 表和 migration 已完成
-- Day 2 Phase 2：Django Admin 文章管理已完成
-- Day 2 Phase 3：公开文章列表和详情 API 已完成
-- Day 2 Phase 4：Vue 文章列表、详情和请求状态已完成
-- Day 2 Phase 5：自动化测试已完成；删除流程和测试数据数量需要重新人工验收
+- Day 2 Phase 1：Article、ArticleChunk 模型、SQLite 表和 migration 已完成
+- Day 2 Phase 2：Django Admin 文章管理、审核服务和审核历史已完成
+- Day 2 Phase 3：公开文章列表/详情、个人文章列表、草稿 CRUD 和提交审核接口已完成
+- Day 2 Phase 4：Vue 文章列表、详情、登录和个人文章管理页面已完成
+- Day 2 Phase 5：后端文章权限与审核测试已完成；当前后端测试 14 项通过，前端生产构建通过
+- 下一阶段：实现最小 RAG 检索闭环，再接入知识问答和审核后的自动发布
 
 ## 文档入口
 
 - [项目开发规范](docs/development-specification.md)
+- [RAG 全链路开发指引](docs/rag-development-guide.md)
 - [Day 1 执行计划](plan/day1.md)
 - [Phase 1 MVP 总体计划](plan/phase1-mvp.md)
 - [项目阶段规划](plan/project-plan.md)
 
-文档职责：`development-specification.md` 定义全项目架构、组件、接口和技术能力；`project-plan.md` 定义长期路线；`phase1-mvp.md` 定义 Phase 1 范围；`day1.md` 定义当天任务。
+文档职责：`development-specification.md` 定义全项目架构、组件、接口和质量要求；`rag-development-guide.md` 面向初学者，按步骤说明 RAG 从文章到问答的实现过程；`project-plan.md` 定义长期路线；`phase1-mvp.md` 定义 Phase 1 范围；`day1.md` 定义当天任务。
 
 ## 当前状态
 
@@ -31,35 +33,44 @@
 - `plan/project-plan.md`
 - `deep-research-report.md`
 - `docs/development-specification.md`
+- `docs/rag-development-guide.md`
 - `README.md`
 - `backend/.venv/`（本地环境，已被 Git 忽略）
 - `backend/requirements.txt`
 - `backend/.env.example`
 - `frontend/package.json`
 - `frontend/pnpm-lock.yaml`
-- Django Project 与四个业务 App
+- Django Project 与业务 App
 - Vue 3 + Vite 页面、路由、Axios 和开发代理
 - `GET /api/health` 及前后端代理联调
+- Article、ArticleChunk 和审核相关数据模型
+- 文章公开读取、个人草稿管理和提交审核接口
 
-当前尚未创建或完成：
+当前尚未完成：
 
-- User、Comment、ArticleChunk 数据模型和权限
-- 用户认证、投稿、管理员审核和评论流程
-- Chroma 索引、embedding 和知识库问答
+- Markdown 清洗和安全渲染服务
+- 按标题/段落切分文章并持久化 ArticleChunk 的服务
+- embedding 模型调用和 Chroma PersistentClient 写入
+- 相似度检索、上下文限制和来源整理
+- `/api/knowledge/chat` 知识问答 API
+- 审核通过后“索引成功才发布”的自动状态联动
+- 前端公开文章和问答页面切换到真实后端数据后的完整联调
 
-因此，下面的 Django、前端和 Health 测试命令可以直接执行；文章、评论、审核和知识库业务接口需要等待后续 Phase 实现。
+当前前端公开文章接口默认仍使用 mock 数据；设置 `VITE_USE_MOCKS=false` 后才会请求 Django 公开文章接口。
 
 ## 技术栈
 
 | 层次 | 技术 | 说明 |
 | --- | --- | --- |
 | 后端 | Python、Django、Django REST Framework | API、管理入口和业务编排 |
-| 内容管理 | Django Admin | Phase 1 的文章创建、编辑和发布入口 |
+| 内容管理 | Django Admin | 管理文章、审核和索引状态；索引成功后才可正式公开 |
 | 数据库 | SQLite | 保存 User、Article 和 ArticleChunk 映射 |
-| 前端 | Vue 3、Vite、Vue Router、Axios | 文章展示、问答页面和 API 调用 |
-| 向量库 | Chroma PersistentClient | 保存文章向量和检索 metadata |
-| 模型 | OpenAI-compatible 模型服务 | embedding 和回答生成 |
-| 测试 | pytest | 后续接口和 RAG 关键测试 |
+| 前端 | Vue 3、Vite、Vue Router、Axios | 文章展示、草稿管理和问答页面 |
+| 文档解析 | MinerU | 待接入：解析 PDF 等原始文档为 Markdown/JSON |
+| 结构化抽取 | LangExtract | 待接入：抽取章节、主题、实体和原文位置 metadata |
+| 向量库 | Chroma PersistentClient | 待接入：保存文章向量和检索 metadata |
+| 模型 | OpenAI-compatible 模型服务 | 待接入：embedding 和回答生成 |
+| 测试 | pytest | 已有文章权限/审核测试，后续补充 RAG 关键测试 |
 
 ## 规划目录
 
@@ -70,8 +81,9 @@ ownerblog/
 │  ├─ phase1-mvp.md           # Phase 1 总体范围和一周计划
 │  └─ project-plan.md         # 项目整体阶段规划
 ├─ docs/
-│  └─ development-specification.md  # 全项目开发规范
-├─ backend/                   # Django 后端（项目骨架待创建）
+│  ├─ development-specification.md  # 全项目开发规范
+│  └─ rag-development-guide.md      # 面向初学者的 RAG 实施步骤
+├─ backend/                   # Django 后端
 │  ├─ manage.py
 │  ├─ config/                 # Django 项目配置和总路由
 │  ├─ accounts/               # 登录、Session 和角色权限（注册为 Future）
@@ -80,7 +92,7 @@ ownerblog/
 │  ├─ knowledge/              # 索引、检索、问答和 ArticleChunk
 │  ├─ requirements.txt
 │  └─ .env.example
-├─ frontend/                  # Vue/Vite 前端（源码骨架待创建）
+├─ frontend/                  # Vue/Vite 前端
 │  ├─ src/
 │  │  ├─ api/                 # Axios 请求封装
 │  │  ├─ views/               # 列表、详情和问答页面
@@ -95,7 +107,7 @@ ownerblog/
 
 普通用户通过 Vue + REST API 登录、投稿和管理自己的内容；管理员通过 Django Admin 管理账号及全量文章、评论。Phase 1 不实现公开注册，也不实现 `/api/admin/*` 审核 API；管理员审核、下架、删除和索引重建均通过 Django Admin 或 management command 完成。
 
-Phase 1 前端页面：`/` 公开文章列表、`/articles/{id}` 文章详情、`/my-articles` 当前用户文章管理、`/knowledge` 无需登录即可调用且只检索公开文章的知识库问答。
+Phase 1 前端页面：`/` 公开文章列表、`/articles/{id}` 文章详情、`/my-articles` 当前用户文章管理。`/knowledge` 页面已经存在，但后端知识库问答接口仍待按照 [RAG 全链路开发指引](docs/rag-development-guide.md) 接入。
 
 ## 前置环境
 
@@ -104,7 +116,9 @@ Phase 1 前端页面：`/` 公开文章列表、`/articles/{id}` 文章详情、
 - Git
 - Python 3.13（当前验证版本：3.13.15）
 - Node.js 24.x 和 pnpm（当前前端使用 pnpm 锁定依赖）
-- 可访问的 OpenAI-compatible 模型服务（只有实现 embedding 和问答时需要）
+- 可访问的 OpenAI-compatible 模型服务（实现 embedding 和问答时需要）
+- MinerU 运行环境（支持 PDF 等原始文档导入时需要）
+- LangExtract 及其模型服务配置（需要结构化抽取和来源位置 metadata 时需要）
 
 Python 依赖版本固定在 `backend/requirements.txt`；前端依赖版本由 `frontend/package.json` 和 `frontend/pnpm-lock.yaml` 共同固定。更换 Python、Node.js、pnpm 或依赖版本时，需要重新验证并同步更新文档和锁定文件。
 
@@ -364,7 +378,7 @@ VITE_USE_MOCKS=false
 
 ### 当前接口基线
 
-项目开发规范定义以下 Phase 1 接口；Day 2 已实现公开文章读取接口，其余写入、审核和知识库接口仍在后续阶段实现：
+文章公开读取、个人草稿管理、提交审核和认证接口已经有后端实现；管理员审核主要通过 Django Admin 完成。RAG 索引和知识问答接口仍属于待开发能力：
 
 | 方法 | 路径 | 用途 | 登录要求 |
 | --- | --- | --- | --- |
@@ -383,7 +397,7 @@ VITE_USE_MOCKS=false
 | `POST` | `/api/admin/articles/{id}/approve` | Future：管理员通过文章并触发索引 | admin |
 | `POST` | `/api/admin/articles/{id}/offline` | Future：管理员下架文章 | admin |
 | `GET` | `/api/health` | 检查后端和代理链路 | 不需要 |
-| `POST` | `/api/knowledge/chat` | 单轮知识库问答，允许匿名访问 | 不需要 |
+| `POST` | `/api/knowledge/chat` | 待实现：单轮知识库问答，允许匿名访问 | 不需要 |
 
 `/admin/` 是 Django Session/staff 管理入口，不属于 Vue 公开 API。完整请求/响应和权限规则见项目开发规范。
 
@@ -510,20 +524,16 @@ python manage.py runserver --noreload
 
 立即停止提交操作，检查 `.gitignore` 和文件内容。确认 `.env`、API Key、数据库、Chroma 数据、`.venv` 和 `node_modules` 没有被追踪。
 
-## 当前尚未实现内容
+### 当前尚未实现内容
 
-以下内容属于后续开发，不应因为 README 已经写出启动命令就视为完成：
+以下内容是当前代码的真实待办，不代表已经完成：
 
-1. 创建 Django 项目和 `accounts`、`articles`、`comments`、`knowledge` App。
-2. 实现 `GET /api/health`。
-3. 创建 Vue 3 + Vite 页面并联调 health。
-4. 创建 User、Comment、ArticleChunk 模型和 migrations。
-5. 实现登录、Session/CSRF 和对象级权限；注册接口保留为 Future，不在 Phase 1 实现。
-6. 实现普通用户文章投稿、本人编辑/删除和提交审核。
-7. 实现管理员文章/评论审核、下架、删除和账号管理。
-8. 实现已公开且已索引文章列表、详情和已通过评论 API。
-9. 实现 Markdown 清洗、切分、embedding 和 Chroma 索引门禁。
-10. 实现单轮问答、来源返回、无结果、模型和权限错误处理。
-11. 编写权限、审核、索引、日志和 Phase 1 最终运行说明。
+1. Markdown 清洗、安全渲染和文章切分服务。
+2. embedding 调用、批处理、错误处理和模型配置记录。
+3. Chroma 写入、检索、清理和幂等重建。
+4. `/api/knowledge/chat` 问答接口、来源返回和无结果处理。
+5. 审核通过后执行索引，且只有索引成功才将文章设置为 `published`。
+6. 前端公开文章和问答页面的真实后端联调；公开文章当前需设置 `VITE_USE_MOCKS=false`。
+7. RAG 单元测试、集成测试、异常测试和前后端端到端验证。
 
-Day 1 的下一步入口是 [`plan/day1.md`](plan/day1.md) 中的 Phase 2；项目级开发规范见 [`docs/development-specification.md`](docs/development-specification.md)。
+文章列表、文章详情、个人草稿管理、提交审核和现有后端测试已经完成，具体进度以本文档前面的“当前进度”和“当前状态”为准。

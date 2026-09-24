@@ -1,0 +1,43 @@
+
+> ownerblog-frontend@0.1.0 dev
+> vite --host 127.0.0.1
+
+
+  VITE v7.3.6  ready in 1368 ms
+
+  ➜  Local:   http://127.0.0.1:5173/
+  ➜  press h + enter to show help
+11:15:03 [vite] (client) hmr update /src/views/PipelineView.vue
+11:24:45 [vite] (client) hmr update /src/views/PipelineView.vue
+14:18:27 [vite] (client) hmr update /src/views/PipelineView.vue
+14:53:41 [vite] (client) hmr update /src/views/PipelineView.vue
+14:54:09 [vite] (client) page reload src/main.js
+14:54:24 [vite] (client) page reload src/views/KnowledgeLibraryView.vue.tmp.5464.28f101d11924
+14:54:43 [vite] (client) page reload src/views/DocumentReaderView.vue.tmp.5464.395ffd386988
+14:54:55 [vite] (client) page reload src/views/KnowledgeGraphView.vue.tmp.5464.f4660e0a6223
+14:55:17 [vite] (client) page reload src/views/AgentWorkspaceView.vue.tmp.5464.7276f0014972
+14:55:25 [vite] (client) page reload src/views/KnowledgeAuditView.vue.tmp.5464.0530bf7f5479
+14:55:32 [vite] (client) hmr update /src/App.vue
+14:55:40 [vite] (client) hmr update /src/views/PipelineView.vue
+14:55:48 [vite] (client) hmr update /src/views/PipelineView.vue
+14:56:10 [vite] (client) hmr update /src/styles/global.css
+14:56:38 [vite] (client) hmr update /src/styles/global.css
+15:00:51 [vite] (client) hmr update /src/views/PipelineView.vue, /src/views/KnowledgeLibraryView.vue, /src/views/DocumentReaderView.vue, /src/views/KnowledgeGraphView.vue, /src/views/AgentWorkspaceView.vue
+15:00:57 [vite] (client) hmr update /src/views/KnowledgeLibraryView.vue
+15:01:05 [vite] (client) hmr update /src/views/KnowledgeLibraryView.vue
+15:01:15 [vite] (client) hmr update /src/views/KnowledgeLibraryView.vue
+15:28:19 [vite] (client) hmr update /src/views/HealthView.vue, /src/views/ArticleListView.vue, /src/views/KnowledgeView.vue, /src/views/ArticleDetailView.vue, /src/views/MyArticlesView.vue, /src/views/MyArticlePreviewView.vue, /src/App.vue, /src/views/LoginView.vue, /src/views/PipelineView.vue, /src/views/KnowledgeLibraryView.vue, /src/views/DocumentReaderView.vue, /src/views/KnowledgeGraphView.vue, /src/views/AgentWorkspaceView.vue
+15:28:35 [vite] (client) hmr update /src/views/AgentWorkspaceView.vue
+15:29:11 [vite] (client) hmr update /src/views/PipelineView.vue
+15:29:32 [vite] (client) hmr update /src/views/DocumentReaderView.vue
+15:30:02 [vite] (client) hmr update /src/views/AgentWorkspaceView.vue
+15:30:16 [vite] (client) hmr update /src/views/KnowledgeGraphView.vue
+15:52:31 [vite] (client) hmr update /src/views/KnowledgeLibraryView.vue
+15:52:37 [vite] (client) hmr update /src/views/KnowledgeLibraryView.vue
+15:52:43 [vite] (client) hmr update /src/views/KnowledgeLibraryView.vue
+15:57:27 [vite] (client) hmr update /src/views/PipelineView.vue, /src/views/KnowledgeLibraryView.vue, /src/views/DocumentReaderView.vue, /src/views/KnowledgeGraphView.vue, /src/views/AgentWorkspaceView.vue
+15:57:42 [vite] (client) hmr update /src/views/KnowledgeAuditView.vue
+16:01:42 [vite] (client) hmr update /src/views/PipelineView.vue, /src/views/KnowledgeLibraryView.vue, /src/views/DocumentReaderView.vue, /src/views/KnowledgeGraphView.vue, /src/views/AgentWorkspaceView.vue, /src/views/KnowledgeAuditView.vue
+16:01:48 [vite] (client) hmr update /src/views/KnowledgeAuditView.vue
+16:01:58 [vite] (client) hmr update /src/views/KnowledgeAuditView.vue
+16:02:06 [vite] (client) hmr update /src/views/KnowledgeAuditView.vue

@@ -137,7 +137,7 @@ flowchart TB
 
 
 
-当前 `backend/` 和 `frontend/` 已创建并可运行。Django 后端骨架、Vue/Vite 前端、Vite Proxy 和 `/api/health` 联调链路已经完成；SQLite、Chroma、文章业务 API 和模型服务仍按后续 Phase 逐步接入。Day 1 已验证浏览器到 `/api/health` 的最小链路，以上拓扑中的业务数据流属于后续实现范围。
+当前 `backend/` 和 `frontend/` 已创建并可运行。Django 后端、Vue/Vite 前端、Vite Proxy、认证基础能力、文章模型、文章 API、个人草稿管理、提交审核和 `/api/health` 联调链路已经完成；ArticleChunk 数据模型和 RAG 配置已准备。Markdown 清洗、切分、embedding、Chroma、问答 API 和审核后的自动索引发布仍按后续步骤接入。
 
 ## 4. 前后端边界与交互契约
 
@@ -228,9 +228,11 @@ Vue -> Axios -> Django/DRF -> 公开门禁查询 -> SQLite -> JSON -> Vue 渲染
 知识库问答：
 
 ```text
-Vue -> Axios -> Django/DRF -> 公开文章片段检索 -> embedding/Chroma
+Vue -> Axios -> Django/DRF -> 待实现的公开文章片段检索 -> embedding/Chroma
      -> GPT-compatible Model -> answer + sources -> Vue 渲染
 ```
+
+当前 `/knowledge` 页面和前端请求封装已存在，但后端问答接口尚未实现。
 
 文章删除：
 
@@ -322,9 +324,11 @@ Phase 1 的核心完成条件是文章审核、索引、公开门禁和问答链
 | HTTP 客户端 | Axios                           | phase1  | 统一 API 请求和错误处理                              |
 | 状态管理     | Vue `ref`/组合式状态                 | phase1  | Phase 1 暂不强制引入 Pinia，认证状态可由轻量 composable 管理 |
 | 数据库      | SQLite                          | phase1  | 降低本地开发和学习成本，使用 Django migrations 建表         |
+| 文档解析    | MinerU                           | planned | 解析 PDF 等原始文档并输出 Markdown/JSON                         |
+| 结构化抽取  | LangExtract                     | planned | 抽取章节、主题、实体和原文位置 metadata                        |
 | 向量库      | Chroma PersistentClient         | phase1  | 本地嵌入式向量存储，不作为高并发生产方案                        |
 | 模型       | OpenAI-compatible SDK/API       | phase1  | 通过环境变量配置服务地址、密钥和模型                          |
-| 测试       | pytest、pytest-django            | planned | 覆盖模型、API、索引和问答关键路径                          |
+| 测试       | pytest、pytest-django            | phase1 | 已有文章权限、审核和公开读取测试；RAG 关键测试待补齐                          |
 | 日志       | Python logging / Django logging | phase1  | 记录索引、模型调用和错误分类，不记录密钥                        |
 | 容器化      | Docker Compose                  | future  | 长期工程化能力，不作为 Phase 1 完成门槛                    |
 
@@ -350,12 +354,11 @@ Phase 1 的核心完成条件是文章审核、索引、公开门禁和问答链
 
 | 路由               | 页面                  | 职责                  | 状态     |
 | ---------------- | ------------------- | ------------------- | ------ |
-| `/`              | `ArticleListView`   | 获取并展示已发布文章列表        | phase1 |
-| `/articles/:id`  | `ArticleDetailView` | 获取并展示文章详情和 Markdown | phase1 |
-| `/knowledge`     | `KnowledgeChatView` | 提交问题、展示回答和来源        | phase1 |
-| `/login`         | `LoginView`         | 登录和会话状态             | phase1 |
-| `/articles/new`  | `ArticleEditorView` | 创建自己的文章草稿           | phase1 |
-| `/notifications` | `NotificationView`  | 查看站内系统通知            | phase1 |
+| `/`              | `ArticleListView`   | 获取并展示已发布文章列表        | 已实现 |
+| `/articles/:id`  | `ArticleDetailView` | 获取并展示文章详情和 Markdown | 已实现 |
+| `/knowledge`     | `KnowledgeView`     | 提交问题、展示回答和来源        | 页面已实现，后端问答待接入 |
+| `/login`         | `LoginView`         | 登录和会话状态             | 已实现 |
+| `/my-articles`   | `MyArticlesView`    | 创建、编辑、删除草稿并提交审核 | 已实现 |
 
 
 页面负责组合数据和页面状态，不直接实现 Markdown 清洗、RAG 检索或模型调用。
@@ -476,7 +479,7 @@ knowledge/views.py      问答 API 编排
 knowledge/tests.py      RAG 关键测试
 ```
 
-`knowledge` 负责 Markdown 处理、chunk overlap、批量 embedding、Chroma 操作、阈值过滤、上下文限制、模型回答和来源整理。
+`knowledge` 目录目前已完成 `ArticleChunk` 数据模型和 migration；下面的原始文档解析、结构化抽取、service、模型适配器、问答 API 和 RAG 测试仍是待实现文件。建议按 [RAG 全链路开发指引](rag-development-guide.md) 的顺序逐步补齐：
 
 #### `Django Admin`
 
@@ -1066,7 +1069,7 @@ Django 停止时：Proxy 连接失败 → Axios rejected → Vue 显示 error。
 
 
 
-### 10.1 Markdown 处理
+### 10.1 Markdown 处理（目标能力，当前待实现）
 
 - 保存 Markdown 原文，不在写入时破坏用户内容。
 - 展示前执行安全渲染，禁止未经清洗的 HTML 注入。
@@ -1075,7 +1078,7 @@ Django 停止时：Proxy 连接失败 → Axios rejected → Vue 显示 error。
 
 
 
-### 10.2 Chunk 与 embedding
+### 10.2 Chunk 与 embedding（目标能力，当前待实现）
 
 - 以标题和段落为优先切分边界。
 - 使用 `chunk overlap` 降低跨段语义丢失。
@@ -1085,7 +1088,7 @@ Django 停止时：Proxy 连接失败 → Axios rejected → Vue 显示 error。
 
 
 
-### 10.3 Chroma 索引
+### 10.3 Chroma 索引（目标能力，当前待实现）
 
 - 写入文档时保存文章 ID、chunk index、标题等 metadata。
 - 通过 `vector_document_id` 建立 Chroma 与 ArticleChunk 映射。
@@ -1095,7 +1098,7 @@ Django 停止时：Proxy 连接失败 → Axios rejected → Vue 显示 error。
 
 
 
-### 10.4 RAG 问答
+### 10.4 RAG 问答（目标能力，当前待实现）
 
 - 先检索、过滤和限制上下文，再调用模型。
 - 只把达到阈值的片段交给模型。

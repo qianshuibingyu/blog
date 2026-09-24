@@ -1,0 +1,535 @@
+Watching for file changes with StatReloader
+[17/Sep/2026 10:34:37] "GET /api/health HTTP/1.1" 200 15
+Unauthorized: /api/auth/me
+[17/Sep/2026 10:40:07] "GET /api/auth/me HTTP/1.1" 401 38
+Unauthorized: /api/auth/me
+[17/Sep/2026 10:40:08] "GET /api/auth/me HTTP/1.1" 401 38
+[17/Sep/2026 10:42:15] "GET /api/knowledge/pipeline/csrf HTTP/1.1" 200 38
+Internal Server Error: /api/knowledge/pipeline
+Traceback (most recent call last):
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: knowledge_knowledgepipelinejob.idempotency_key
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\utils\decorators.py", line 192, in _view_wrapper
+    result = _process_exception(request, e)
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\utils\decorators.py", line 190, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\views\decorators\http.py", line 64, in inner
+    return func(request, *args, **kwargs)
+  File "E:\Desktop\VibeCoding\ownerblog\backend\knowledge\views.py", line 35, in pipeline_create
+    job = KnowledgePipelineJob.objects.create(
+        document=document, source_storage_key=f"knowledge/{document.public_id}/source.pdf",
+    ...<2 lines>...
+        idempotency_key=digest.hexdigest(),
+    )
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\models\query.py", line 665, in create
+    obj.save(force_insert=True, using=self.db)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\models\base.py", line 902, in save
+    self.save_base(
+    ~~~~~~~~~~~~~~^
+        using=using,
+        ^^^^^^^^^^^^
+    ...<2 lines>...
+        update_fields=update_fields,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\models\base.py", line 1008, in save_base
+    updated = self._save_table(
+        raw,
+    ...<4 lines>...
+        update_fields,
+    )
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\models\base.py", line 1169, in _save_table
+    results = self._do_insert(
+        cls._base_manager, using, fields, returning_fields, raw
+    )
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\models\base.py", line 1210, in _do_insert
+    return manager._insert(
+           ~~~~~~~~~~~~~~~^
+        [self],
+        ^^^^^^^
+    ...<3 lines>...
+        raw=raw,
+        ^^^^^^^^
+    )
+    ^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\models\query.py", line 1873, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.IntegrityError: UNIQUE constraint failed: knowledge_knowledgepipelinejob.idempotency_key
+[17/Sep/2026 10:42:15] "POST /api/knowledge/pipeline HTTP/1.1" 500 204630
+[17/Sep/2026 10:42:17] "GET /api/knowledge/pipeline/csrf HTTP/1.1" 200 38
+Internal Server Error: /api/knowledge/pipeline
+Traceback (most recent call last):
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: knowledge_knowledgepipelinejob.idempotency_key
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\utils\decorators.py", line 192, in _view_wrapper
+    result = _process_exception(request, e)
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\utils\decorators.py", line 190, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\views\decorators\http.py", line 64, in inner
+    return func(request, *args, **kwargs)
+  File "E:\Desktop\VibeCoding\ownerblog\backend\knowledge\views.py", line 35, in pipeline_create
+    job = KnowledgePipelineJob.objects.create(
+        document=document, source_storage_key=f"knowledge/{document.public_id}/source.pdf",
+    ...<2 lines>...
+        idempotency_key=digest.hexdigest(),
+    )
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\models\query.py", line 665, in create
+    obj.save(force_insert=True, using=self.db)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\models\base.py", line 902, in save
+    self.save_base(
+    ~~~~~~~~~~~~~~^
+        using=using,
+        ^^^^^^^^^^^^
+    ...<2 lines>...
+        update_fields=update_fields,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\models\base.py", line 1008, in save_base
+    updated = self._save_table(
+        raw,
+    ...<4 lines>...
+        update_fields,
+    )
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\models\base.py", line 1169, in _save_table
+    results = self._do_insert(
+        cls._base_manager, using, fields, returning_fields, raw
+    )
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\models\base.py", line 1210, in _do_insert
+    return manager._insert(
+           ~~~~~~~~~~~~~~~^
+        [self],
+        ^^^^^^^
+    ...<3 lines>...
+        raw=raw,
+        ^^^^^^^^
+    )
+    ^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\models\query.py", line 1873, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.IntegrityError: UNIQUE constraint failed: knowledge_knowledgepipelinejob.idempotency_key
+[17/Sep/2026 10:42:17] "POST /api/knowledge/pipeline HTTP/1.1" 500 204630
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\views.py changed, reloading.
+Watching for file changes with StatReloader
+Unauthorized: /api/auth/me
+[17/Sep/2026 10:46:09] "GET /api/auth/me HTTP/1.1" 401 38
+[17/Sep/2026 10:46:44] "GET /api/knowledge/pipeline/csrf HTTP/1.1" 200 38
+[17/Sep/2026 10:46:44] "POST /api/knowledge/pipeline HTTP/1.1" 202 300
+Unauthorized: /api/auth/me
+[17/Sep/2026 11:11:25] "GET /api/auth/me HTTP/1.1" 401 38
+Unauthorized: /api/auth/me
+[17/Sep/2026 11:11:26] "GET /api/auth/me HTTP/1.1" 401 38
+[17/Sep/2026 11:11:40] "GET /api/knowledge/pipeline/csrf HTTP/1.1" 200 38
+[17/Sep/2026 11:11:40] "POST /api/knowledge/pipeline HTTP/1.1" 202 300
+[17/Sep/2026 11:11:40] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:11:41] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:11:43] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:11:44] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:11:46] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:11:47] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:11:49] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:11:50] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:11:52] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:11:53] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:11:55] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:11:56] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:11:58] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:11:59] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:01] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:02] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:04] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:05] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:07] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:08] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:10] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:11] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:13] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:14] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:16] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:18] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:19] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:21] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:22] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:24] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:25] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:27] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:28] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:30] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:31] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:33] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:34] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:36] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:37] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:39] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:40] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:42] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:43] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:45] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:47] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:48] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:50] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:51] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:53] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:54] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:56] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:57] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:12:59] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:00] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:02] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:03] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:05] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:06] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:08] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:09] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:11] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:12] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:14] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:16] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:17] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:19] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:20] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:22] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:23] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:25] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:26] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:28] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:29] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:31] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:32] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:34] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:35] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:37] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:38] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:40] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:41] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:43] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:44] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:46] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:47] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:49] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:50] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:52] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:53] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:55] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:56] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:13:58] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:14:00] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:14:01] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:14:03] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:14:04] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:14:06] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:14:07] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+[17/Sep/2026 11:14:09] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 306
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\views.py changed, reloading.
+Watching for file changes with StatReloader
+Unauthorized: /api/auth/me
+[17/Sep/2026 11:15:41] "GET /api/auth/me HTTP/1.1" 401 38
+[17/Sep/2026 11:19:50] "GET /api/knowledge/pipeline/csrf HTTP/1.1" 200 38
+[17/Sep/2026 11:22:46] "GET /api/knowledge/pipeline/csrf HTTP/1.1" 200 38
+[17/Sep/2026 11:22:46] "POST /api/knowledge/pipeline HTTP/1.1" 202 302
+[17/Sep/2026 11:22:46] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 308
+[17/Sep/2026 11:22:47] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 308
+[17/Sep/2026 11:22:49] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 308
+[17/Sep/2026 11:22:50] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 308
+[17/Sep/2026 11:22:52] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 308
+[17/Sep/2026 11:22:53] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 308
+[17/Sep/2026 11:22:55] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 308
+[17/Sep/2026 11:22:56] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 318
+[17/Sep/2026 11:22:58] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 318
+[17/Sep/2026 11:22:59] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 318
+E:\Desktop\VibeCoding\ownerblog\langextract\langextract\__init__.py:55: UserWarning: With 'config', schema constraints are still applied via examples. Or pass output_schema=... for an explicit schema.
+  return extract_func(*args, **kwargs)
+[17/Sep/2026 11:23:01] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 318
+[17/Sep/2026 11:23:02] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 318
+[94m[1mLangExtract[0m: model=[92mgpt-5.6-luna[0m [00:00][94m[1mLangExtract[0m: model=[92mgpt-5.6-luna[0m, current=[92m519[0m chars, processed=[92m0[0m chars:  [00:00][17/Sep/2026 11:23:04] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 318
+[17/Sep/2026 11:23:05] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 318
+[17/Sep/2026 11:23:07] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 318
+[17/Sep/2026 11:23:08] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 318
+[17/Sep/2026 11:23:10] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 318
+[17/Sep/2026 11:23:11] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 318
+[94m[1mLangExtract[0m: model=[92mgpt-5.6-luna[0m, current=[92m519[0m chars, processed=[92m0[0m chars:  [00:08][94m[1mLangExtract[0m: model=[92mgpt-5.6-luna[0m, current=[92m519[0m chars, processed=[92m0[0m chars:  [00:08]
+[94m[1mLangExtract[0m: Saving to [92mE:\Desktop\VibeCoding\ownerblog\backend\data\media\knowledge\39c631ee-9c22-4c04-b5c6-fd537e47e3c2\langextract\extraction_results.jsonl[0m: 0 docs [00:00, ? docs/s][94m[1mLangExtract[0m: Saving to [92mE:\Desktop\VibeCoding\ownerblog\backend\data\media\knowledge\39c631ee-9c22-4c04-b5c6-fd537e47e3c2\langextract\extraction_results.jsonl[0m: 1 docs [00:00, 864.63 docs/s]
+[17/Sep/2026 11:23:13] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 314
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\views.py changed, reloading.
+Watching for file changes with StatReloader
+[17/Sep/2026 11:26:06] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 2496
+Unauthorized: /api/auth/me
+[17/Sep/2026 11:26:50] "GET /api/auth/me HTTP/1.1" 401 38
+[17/Sep/2026 11:27:53] "GET /api/knowledge/pipeline/csrf HTTP/1.1" 200 38
+[17/Sep/2026 11:27:53] "POST /api/knowledge/pipeline HTTP/1.1" 200 2496
+[17/Sep/2026 11:27:53] "GET /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2 HTTP/1.1" 200 2496
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\models.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\mineru_client.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\models.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\graph_services.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\pipeline.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\tasks.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\views.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\config\settings.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\pipeline_state.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\pipeline_state.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\admin.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\admin.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\admin.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\graph_services.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\graph_services.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\graph_services.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\pipeline.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\models.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\models.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\pipeline.py changed, reloading.
+Watching for file changes with StatReloader
+[17/Sep/2026 14:31:23] "GET /api/knowledge/pipeline/csrf HTTP/1.1" 200 38
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\models.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\models.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\models.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\models.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\pipeline_state.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\pipeline_state.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\pipeline.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\views.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\urls.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\config\urls.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\config\settings.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\admin.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\admin.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\pipeline.py changed, reloading.
+Watching for file changes with StatReloader
+[17/Sep/2026 14:59:53] "GET /api/knowledge/documents HTTP/1.1" 200 914
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\views.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\views.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\views.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\urls.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\agent_service.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\agent_service.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\models.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\models.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\models.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\agent_service.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\agent_service.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\agent_service.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\agent_service.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\tasks.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\tasks.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\views.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\models.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\agent_urls.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\agent_service.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\agent_service.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\agent_service.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\models.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\models.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\views.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\views.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\agent_service.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\models.py changed, reloading.
+Watching for file changes with StatReloader
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\threading.py", line 1044, in _bootstrap_inner
+    self.run()
+    ~~~~~~~~^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\threading.py", line 995, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\utils\autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+    ~~^^^^^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\core\management\commands\runserver.py", line 134, in inner_run
+    self.check(**check_kwargs)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "E:\Desktop\VibeCoding\ownerblog\backend\.venv\Lib\site-packages\django\core\management\base.py", line 573, in check
+    raise SystemCheckError(msg)
+django.core.management.base.SystemCheckError: SystemCheckError: System check identified some issues:
+
+ERRORS:
+?: (models.E030) index name 'knowledge_d_owner_i_91e3c2_idx' is not unique among models: knowledge.AgentSession, knowledge.KnowledgeDocument.
+
+System check identified 1 issue (0 silenced).
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\models.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\views.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\permissions.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\permissions.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\permissions.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\views.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\config\settings.py changed, reloading.
+Watching for file changes with StatReloader
+Unauthorized: /api/knowledge/documents
+[17/Sep/2026 15:36:01] "GET /api/knowledge/documents HTTP/1.1" 401 153
+Unauthorized: /api/agent/runs/00000000-0000-0000-0000-000000000000/events
+[17/Sep/2026 15:36:01] "GET /api/agent/runs/00000000-0000-0000-0000-000000000000/events HTTP/1.1" 401 153
+E:\Desktop\VibeCoding\ownerblog\backend\config\settings.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\views.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\tasks.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\views.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\views.py changed, reloading.
+Watching for file changes with StatReloader
+E:\Desktop\VibeCoding\ownerblog\backend\knowledge\views.py changed, reloading.
+Watching for file changes with StatReloader

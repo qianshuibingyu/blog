@@ -1,0 +1,138 @@
+11:14:10 [vite] http proxy error: /api/knowledge/pipeline/39c631ee-9c22-4c04-b5c6-fd537e47e3c2
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2021:16)
+14:54:10 [vite] (client) Pre-transform error: Failed to resolve import "../views/KnowledgeLibraryView.vue" from "src/router/index.js". Does the file exist?
+  Plugin: vite:import-analysis
+  File: E:/Desktop/VibeCoding/ownerblog/frontend/src/router/index.js:9:34
+  7  |  import MyArticlePreviewView from "../views/MyArticlePreviewView.vue"
+  8  |  import PipelineView from "../views/PipelineView.vue"
+  9  |  import KnowledgeLibraryView from "../views/KnowledgeLibraryView.vue"
+     |                                    ^
+  10 |  import DocumentReaderView from "../views/DocumentReaderView.vue"
+  11 |  import KnowledgeGraphView from "../views/KnowledgeGraphView.vue"
+14:54:10 [vite] Internal server error: Failed to resolve import "../views/KnowledgeLibraryView.vue" from "src/router/index.js". Does the file exist?
+  Plugin: vite:import-analysis
+  File: E:/Desktop/VibeCoding/ownerblog/frontend/src/router/index.js:9:34
+  7  |  import MyArticlePreviewView from "../views/MyArticlePreviewView.vue"
+  8  |  import PipelineView from "../views/PipelineView.vue"
+  9  |  import KnowledgeLibraryView from "../views/KnowledgeLibraryView.vue"
+     |                                    ^
+  10 |  import DocumentReaderView from "../views/DocumentReaderView.vue"
+  11 |  import KnowledgeGraphView from "../views/KnowledgeGraphView.vue"
+      at TransformPluginContext._formatLog (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:29079:43)
+      at TransformPluginContext.error (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:29076:14)
+      at normalizeUrl (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:27199:18)
+      at async file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:27257:32
+      at async Promise.all (index 8)
+      at async TransformPluginContext.transform (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:27225:4)
+      at async EnvironmentPluginContainer.transform (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:28877:14)
+      at async loadAndTransform (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:22746:26)
+      at async viteTransformMiddleware (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:24622:20)
+14:54:25 [vite] (client) Pre-transform error: Failed to resolve import "../views/DocumentReaderView.vue" from "src/router/index.js". Does the file exist?
+  Plugin: vite:import-analysis
+  File: E:/Desktop/VibeCoding/ownerblog/frontend/src/router/index.js:10:32
+  8  |  import PipelineView from "../views/PipelineView.vue"
+  9  |  import KnowledgeLibraryView from "../views/KnowledgeLibraryView.vue"
+  10 |  import DocumentReaderView from "../views/DocumentReaderView.vue"
+     |                                  ^
+  11 |  import KnowledgeGraphView from "../views/KnowledgeGraphView.vue"
+  12 |  import AgentWorkspaceView from "../views/AgentWorkspaceView.vue"
+14:54:25 [vite] Internal server error: Failed to resolve import "../views/DocumentReaderView.vue" from "src/router/index.js". Does the file exist?
+  Plugin: vite:import-analysis
+  File: E:/Desktop/VibeCoding/ownerblog/frontend/src/router/index.js:10:32
+  8  |  import PipelineView from "../views/PipelineView.vue"
+  9  |  import KnowledgeLibraryView from "../views/KnowledgeLibraryView.vue"
+  10 |  import DocumentReaderView from "../views/DocumentReaderView.vue"
+     |                                  ^
+  11 |  import KnowledgeGraphView from "../views/KnowledgeGraphView.vue"
+  12 |  import AgentWorkspaceView from "../views/AgentWorkspaceView.vue"
+      at TransformPluginContext._formatLog (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:29079:43)
+      at TransformPluginContext.error (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:29076:14)
+      at normalizeUrl (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:27199:18)
+      at async file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:27257:32
+      at async Promise.all (index 9)
+      at async TransformPluginContext.transform (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:27225:4)
+      at async EnvironmentPluginContainer.transform (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:28877:14)
+      at async loadAndTransform (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:22746:26)
+      at async viteTransformMiddleware (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:24622:20)
+14:54:44 [vite] (client) Pre-transform error: Failed to resolve import "../views/KnowledgeGraphView.vue" from "src/router/index.js". Does the file exist?
+  Plugin: vite:import-analysis
+  File: E:/Desktop/VibeCoding/ownerblog/frontend/src/router/index.js:11:32
+  9  |  import KnowledgeLibraryView from "../views/KnowledgeLibraryView.vue"
+  10 |  import DocumentReaderView from "../views/DocumentReaderView.vue"
+  11 |  import KnowledgeGraphView from "../views/KnowledgeGraphView.vue"
+     |                                  ^
+  12 |  import AgentWorkspaceView from "../views/AgentWorkspaceView.vue"
+  13 |  import KnowledgeAuditView from "../views/KnowledgeAuditView.vue"
+14:54:44 [vite] Internal server error: Failed to resolve import "../views/KnowledgeGraphView.vue" from "src/router/index.js". Does the file exist?
+  Plugin: vite:import-analysis
+  File: E:/Desktop/VibeCoding/ownerblog/frontend/src/router/index.js:11:32
+  9  |  import KnowledgeLibraryView from "../views/KnowledgeLibraryView.vue"
+  10 |  import DocumentReaderView from "../views/DocumentReaderView.vue"
+  11 |  import KnowledgeGraphView from "../views/KnowledgeGraphView.vue"
+     |                                  ^
+  12 |  import AgentWorkspaceView from "../views/AgentWorkspaceView.vue"
+  13 |  import KnowledgeAuditView from "../views/KnowledgeAuditView.vue"
+      at TransformPluginContext._formatLog (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:29079:43)
+      at TransformPluginContext.error (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:29076:14)
+      at normalizeUrl (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:27199:18)
+      at async file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:27257:32
+      at async Promise.all (index 10)
+      at async TransformPluginContext.transform (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:27225:4)
+      at async EnvironmentPluginContainer.transform (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:28877:14)
+      at async loadAndTransform (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:22746:26)
+      at async viteTransformMiddleware (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:24622:20)
+14:54:56 [vite] (client) Pre-transform error: Failed to resolve import "../views/AgentWorkspaceView.vue" from "src/router/index.js". Does the file exist?
+  Plugin: vite:import-analysis
+  File: E:/Desktop/VibeCoding/ownerblog/frontend/src/router/index.js:12:32
+  10 |  import DocumentReaderView from "../views/DocumentReaderView.vue"
+  11 |  import KnowledgeGraphView from "../views/KnowledgeGraphView.vue"
+  12 |  import AgentWorkspaceView from "../views/AgentWorkspaceView.vue"
+     |                                  ^
+  13 |  import KnowledgeAuditView from "../views/KnowledgeAuditView.vue"
+  14 |  
+14:54:56 [vite] Internal server error: Failed to resolve import "../views/AgentWorkspaceView.vue" from "src/router/index.js". Does the file exist?
+  Plugin: vite:import-analysis
+  File: E:/Desktop/VibeCoding/ownerblog/frontend/src/router/index.js:12:32
+  10 |  import DocumentReaderView from "../views/DocumentReaderView.vue"
+  11 |  import KnowledgeGraphView from "../views/KnowledgeGraphView.vue"
+  12 |  import AgentWorkspaceView from "../views/AgentWorkspaceView.vue"
+     |                                  ^
+  13 |  import KnowledgeAuditView from "../views/KnowledgeAuditView.vue"
+  14 |  
+      at TransformPluginContext._formatLog (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:29079:43)
+      at TransformPluginContext.error (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:29076:14)
+      at normalizeUrl (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:27199:18)
+      at async file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:27257:32
+      at async Promise.all (index 11)
+      at async TransformPluginContext.transform (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:27225:4)
+      at async EnvironmentPluginContainer.transform (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:28877:14)
+      at async loadAndTransform (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:22746:26)
+      at async viteTransformMiddleware (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:24622:20)
+14:55:17 [vite] (client) Pre-transform error: Failed to resolve import "../views/KnowledgeAuditView.vue" from "src/router/index.js". Does the file exist?
+  Plugin: vite:import-analysis
+  File: E:/Desktop/VibeCoding/ownerblog/frontend/src/router/index.js:13:32
+  11 |  import KnowledgeGraphView from "../views/KnowledgeGraphView.vue"
+  12 |  import AgentWorkspaceView from "../views/AgentWorkspaceView.vue"
+  13 |  import KnowledgeAuditView from "../views/KnowledgeAuditView.vue"
+     |                                  ^
+  14 |  
+  15 |  export default createRouter({
+14:55:17 [vite] Internal server error: Failed to resolve import "../views/KnowledgeAuditView.vue" from "src/router/index.js". Does the file exist?
+  Plugin: vite:import-analysis
+  File: E:/Desktop/VibeCoding/ownerblog/frontend/src/router/index.js:13:32
+  11 |  import KnowledgeGraphView from "../views/KnowledgeGraphView.vue"
+  12 |  import AgentWorkspaceView from "../views/AgentWorkspaceView.vue"
+  13 |  import KnowledgeAuditView from "../views/KnowledgeAuditView.vue"
+     |                                  ^
+  14 |  
+  15 |  export default createRouter({
+      at TransformPluginContext._formatLog (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:29079:43)
+      at TransformPluginContext.error (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:29076:14)
+      at normalizeUrl (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:27199:18)
+      at async file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:27257:32
+      at async Promise.all (index 12)
+      at async TransformPluginContext.transform (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:27225:4)
+      at async EnvironmentPluginContainer.transform (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:28877:14)
+      at async loadAndTransform (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:22746:26)
+      at async viteTransformMiddleware (file:///E:/Desktop/VibeCoding/ownerblog/frontend/node_modules/.pnpm/vite@7.3.6/node_modules/vite/dist/node/chunks/config.js:24622:20)

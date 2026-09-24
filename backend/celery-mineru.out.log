@@ -1,0 +1,21 @@
+ 
+ -------------- celery@PC-20250926BSPG v5.5.3 (immunity)
+--- ***** ----- 
+-- ******* ---- Windows-10-10.0.19045-SP0 2026-09-17 09:13:36
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         config:0x24bb334a900
+- ** ---------- .> transport:   redis://localhost:6379/0
+- ** ---------- .> results:     redis://localhost:6379/1
+- *** --- * --- .> concurrency: 1 (solo)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> mineru           exchange=default(direct) key=default
+                
+
+[tasks]
+  . knowledge.tasks.reconcile_expired_jobs
+  . knowledge.tasks.run_extraction
+  . knowledge.tasks.run_mineru
+
