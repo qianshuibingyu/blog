@@ -1,0 +1,1 @@
+{"document_id": "7a7d4f2a-9136-4620-81c8-41d2ca3a1264", "text": "前缀 <table>指标</table> ✅", "extractions": [{"extraction_index": 1, "extraction_class": "metric", "extraction_text": "指标", "char_interval": {"start_pos": 10, "end_pos": 12}, "alignment_status": "match_exact", "attributes": {}}]}

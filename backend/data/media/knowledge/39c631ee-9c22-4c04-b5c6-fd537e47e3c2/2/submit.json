@@ -1,0 +1,9 @@
+{
+  "code": 0,
+  "msg": "ok",
+  "trace_id": "3384098904e54aa881f8ac463c2fd444",
+  "data": {
+    "task_id": "dbde89b5-7289-43c3-a27d-63fd8d15d9a803",
+    "file_url": "https://mineru.oss-cn-shanghai.aliyuncs.com/api-upload/extract/2026-09-17/agent/dbde89b5-7289-43c3-a27d-63fd8d15d9a8.pdf?Expires=1789701591&OSSAccessKeyId=LTAI5t8fSGMgiRhQn4mpp926&Signature=yWvmWX46FFRCs%2FcmaJ38vaj0u6I%3D"
+  }
+}
