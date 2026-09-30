@@ -153,3 +153,22 @@ CSRF_TRUSTED_ORIGINS = [
 
 CSRF_COOKIE_NAME = "csrftoken"
 SCRF_HEADER_NAME = "HTTP_X_CSRFTOKEN"
+
+# 防止超大 Markdown 进入渲染器并占用过多内存
+CONTENT_MAX_LENGTH = int(
+    os.getenv("CONTENT_MAX_LENGTH", "500000")
+)
+
+# 去除商检标题标记后，正文至少需要达到的字符数
+CONTENT_MIN_LENGTH = int(
+    os.getenv("CONTENT_MIN_LENGTH", "10")
+)
+
+# 阶段4的文本片段最大字符数
+RAG_CHUNK_SIZE = int(os.getenv("RAG_CHUNK_SIZE", "1000"))
+# 相邻片段允许重叠的最大字符数
+RAG_CHUNK_OVERLAP = int(os.getenv("RAG_CHUNK_OVERLAP", "150"))
+# 小片段合并阈值
+RAG_MIN_CHUNK_SIZE = int(os.getenv("RAG_MIN_CHUNK_SIZE", "40"))
+# 防止异常文档产生无限数量片段
+RAG_MAX_CHUNKS = int(os.getenv("RAG_MAX_CHUNKS", "1000"))

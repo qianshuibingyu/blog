@@ -25,6 +25,13 @@ def approve_article(*, article, actor):
     # 进入索引流程，不能直接公开
     article.status = ArticleStatus.INDEXING
     article.index_status = IndexStatus.INDEXING
+    # 后续阶段从这个步骤继续处理
+    article.index_step = "content_validation"
+    # 新的一次索引尝试不应显示上一次失败留下的错误
+    article.index_error = ""
+    article.embedding_error = ""
+    article.chroma_error = ""
+
     article.reviewed_by = actor
     article.reviewed_at = timezone.now()
 
@@ -33,6 +40,10 @@ def approve_article(*, article, actor):
         update_fields=[
             "status",
             "index_status",
+            "index_step",
+            "index_error",
+            "embedding_error",
+            "chroma_error",
             "reviewed_by",
             "reviewed_at",
             "updated_at",
