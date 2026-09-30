@@ -271,3 +271,84 @@ class ArticleAPITests(TestCase):
                 type="article_rejected",
             ).exists()
         )
+    
+    # 测试管理员通过待审核文章后，文章会进入阶段1的索引入口
+    def test_admin_approve_initializes_index_entry(self):
+        admin = get_user_model().objects.create_user(
+            username="index-entrydmin",
+            password="password",
+            is_staff=True,
+        )
+        # 将测试文章设置为作者已提交审核的状态
+        self.draft_article.status = ArticleStatus.PENDING_REVIEW
+        self.draft_article.save()
+        # 调用实际的审核通过业务函数
+        approve_article(article=self.draft_article, actor=admin)
+        # 从数据库重新读取，避免只检查内存中的旧对象
+        self.draft_article.refresh_from_db()
+        self.assertEqual(self.draft_article.status, ArticleStatus.INDEXING)
+        self.assertEqual(self.draft_article.index_status, IndexStatus.INDEXING)
+        self.assertEqual(self.draft_article.index_step, "content_validation")
+        self.assertEqual(self.draft_article.reviewed_by, admin)
+        self.assertIsNotNone(self.draft_article.reviewed_at)
+        self.assertNotEqual(self.draft_article.status, ArticleStatus.PUBLISHED)
+
+
+    # 测试重新开始索引时会清理上一次失败留下的错误
+    def test_admin_approve_clears_previous_index_errors(self):
+        admin = get_user_model().objects.create_user(
+            username="clear-index-errors-admin",
+            password="password",
+            is_staff=True,
+        )
+        self.draft_article.status = ArticleStatus.PENDING_REVIEW
+        self.draft_article.index_status = IndexStatus.FAILED
+        self.draft_article.index_step = "embedding"
+        self.draft_article.index_error = "旧的索引错误"
+        self.draft_article.embedding_error = "旧的 embedding 错误"
+        self.draft_article.chroma_error = "旧的 Chroma 错误"
+        self.draft_article.save()
+        # 调用审核通过入口， 开始新的一次索引尝试
+        approve_article(article=self.draft_article, actor=admin)
+        self.draft_article.refresh_from_db()
+        self.assertEqual(self.draft_article.index_error, "")
+        self.assertEqual(self.draft_article.embedding_error, "")
+        self.assertEqual(self.draft_article.chroma_error, "")
+        self.assertEqual(self.draft_article.index_step, "content_validation")
+
+    # 测试审核通过操作会写入正确的审核历史
+    def test_admin_approve_creates_correct_moderation_event(self):
+        admin = get_user_model().objects.create_user(
+            username="audit-event-admin",
+            password="password",
+            is_staff=True,
+        )
+        self.draft_article.status = ArticleStatus.PENDING_REVIEW
+        self.draft_article.save()
+        # 调用审核通过入口
+        approve_article(article=self.draft_article, actor=admin)
+        # 查询当前文章对应的审核通过事件
+        event = ModerationEvent.objects.get(
+            object_type="article",
+            object_id=self.draft_article.id,
+            action="approve",
+        )
+        self.assertEqual(event.actor, admin)
+        self.assertEqual(event.from_status, ArticleStatus.PENDING_REVIEW)
+        self.assertEqual(event.to_status, ArticleStatus.INDEXING)
+
+    # 测试管理员不能绕过提交审核，直接通过草稿
+    def test_admin_cannot_approve_draft_directly(self):
+        admin = get_user_model().objects.create_user(
+            username="draft-boundary-admin",
+            password="password",
+            is_staff=True,
+        )
+
+        # 断言草稿调用审核通过入口会被拒绝
+        with self.assertRaises(ValueError):
+            approve_article(article=self.draft_article, actor=admin)
+
+        # 从数据库重新读取文章
+        self.draft_article.refresh_from_db()
+        self.assertEqual(self.draft_article.status, ArticleStatus.DRAFT)
