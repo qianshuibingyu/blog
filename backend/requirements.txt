@@ -12,6 +12,11 @@ bleach==6.4.0
 # 向量数据库和模型服务
 chromadb==1.5.9
 openai==3.3.1
+langextract==1.7.0
+sentence-transformers==5.1.1
+# torch 2.2.x wheels used by the current macOS x86_64 Python 3.12 environment
+numpy<2
+scipy<1.15
 
 # 测试
 pytest==9.1.1

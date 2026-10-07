@@ -152,7 +152,7 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 CSRF_COOKIE_NAME = "csrftoken"
-SCRF_HEADER_NAME = "HTTP_X_CSRFTOKEN"
+CSRF_HEADER_NAME = "HTTP_X_CSRFTOKEN"
 
 # 防止超大 Markdown 进入渲染器并占用过多内存
 CONTENT_MAX_LENGTH = int(
@@ -172,3 +172,36 @@ RAG_CHUNK_OVERLAP = int(os.getenv("RAG_CHUNK_OVERLAP", "150"))
 RAG_MIN_CHUNK_SIZE = int(os.getenv("RAG_MIN_CHUNK_SIZE", "40"))
 # 防止异常文档产生无限数量片段
 RAG_MAX_CHUNKS = int(os.getenv("RAG_MAX_CHUNKS", "1000"))
+
+# 读取 OpenAI-compatible 服务根地址
+MODEL_BASE_URL = os.getenv("MODEL_BASE_URL", "")
+# 读取服务密钥， 真实值只来自本机环境
+MODEL_API_KEY = os.getenv("MODEL_API_KEY", "")
+# 读取 LangExtract/chat 使用的模型名称；不要将它用于 Embedding。
+MODEL_NAME = os.getenv("MODEL_NAME", "")
+# Embedding 模型独立配置，避免聊天模型名称意外发送到 Embedding API。
+EMBEDDING_MODEL = os.getenv(
+    "EMBEDDING_MODEL",
+    "BAAI/bge-small-zh-v1.5",
+)
+# 默认使用本地 Sentence Transformers；远程模式需显式配置 openai_compatible。
+EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "local")
+# Sentence Transformers 使用的设备，例如 cpu、mps 或 cuda。
+EMBEDDING_DEVICE = os.getenv("EMBEDDING_DEVICE", "cpu")
+# 读取批量大小
+EMBEDDING_BATCH_SIZE = int(os.getenv("EMBEDDING_BATCH_SIZE", "32"))
+# 读取最大重试次数
+EMBEDDING_MAX_RETRIES = int(os.getenv("EMBEDDING_MAX_RETRIES", "2"))
+# 读取退避时间
+EMBEDDING_RETRY_BACKOFF_SECONDS = float(os.getenv("EMBEDDING_RETRY_BACKOFF_SECONDS", "1"))
+# 读取模型请求超时配置
+LLM_TIMEOUT_SECONDS = int(os.getenv("LLM_TIMEOUT_SECONDS", "30"))
+# 让 Embedding 复用项目超时配置
+EMBEDDING_TIMEOUT_SECONDS = LLM_TIMEOUT_SECONDS
+
+# 读取 Chroma 本地持久化目录配置
+CHROMA_PERSIST_DIRECTORY = os.getenv("CHROMA_PERSIST_DIRECTORY", "./data/chroma")
+# 将相对路径统一解析为相对于 backend 目录的绝对路径
+CHROMA_PERSIST_DIRECTORY = str((BASE_DIR / CHROMA_PERSIST_DIRECTORY).resolve()) if not os.path.isabs(CHROMA_PERSIST_DIRECTORY) else CHROMA_PERSIST_DIRECTORY
+# 读取固定的 Chroma collection 名称
+CHROMA_COLLECTION_NAME = os.getenv("CHROMA_COLLECTION_NAME", "ownerblog_articles")

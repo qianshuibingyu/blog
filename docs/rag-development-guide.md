@@ -418,15 +418,17 @@ cleaned_content
 
 ### 本阶段需要实现的功能
 
-1. 将文章片段批量转换为向量；
-2. 将用户问题转换为向量；
-3. 使用同一个 Embedding 模型处理文章和问题；
-4. 支持批量处理；
-5. 设置请求超时；
-6. 处理模型服务不可用、超时和空响应；
-7. 校验向量数量和片段数量一致；
-8. 记录 Embedding 失败原因；
-9. 模型更换后支持重新索引。
+1. 默认使用本地 Sentence Transformers provider：`EMBEDDING_PROVIDER=local`、`EMBEDDING_MODEL=BAAI/bge-small-zh-v1.5`、`EMBEDDING_DEVICE=cpu`；该模型通常生成 512 维向量；
+2. 将文章片段批量转换为向量；
+3. 将用户问题转换为向量；
+4. 使用同一个 Embedding provider/model 处理文章和问题；
+5. 支持按 `EMBEDDING_BATCH_SIZE` 分批处理；
+6. 本地模型首次使用时允许下载并缓存，模型文件不提交；
+7. 只有显式使用 `EMBEDDING_PROVIDER=openai_compatible` 时才调用远程 Embedding API，并设置请求超时和重试；
+8. `MODEL_NAME` 只供 LangExtract/chat 使用，不得回退为 Embedding 模型；
+9. 校验向量数量、有限数值和维度；
+10. 记录 Embedding 失败原因；
+11. 模型或 provider 更换后重建 Chroma collection 并重新索引，禁止混用旧向量。
 
 ### 本阶段输出
 

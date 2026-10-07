@@ -94,7 +94,8 @@ flowchart LR
     Knowledge["knowledge<br/>索引 / 检索 / 问答"]
     SQLite[("SQLite<br/>User / Article / ArticleChunk")]
     Chroma[("Chroma PersistentClient<br/>向量与 metadata")]
-    Model["OpenAI-compatible Model Service<br/>Embedding / Chat"]
+    Model["OpenAI-compatible Chat/LangExtract Service"]
+    LocalEmbedding["Local Sentence Transformers<br/>BGE Embedding"]
 
     Browser --> Vue
     Vue --> Axios
@@ -1078,13 +1079,15 @@ Django 停止时：Proxy 连接失败 → Axios rejected → Vue 显示 error。
 
 
 
-### 10.2 Chunk 与 embedding（目标能力，当前待实现）
+### 10.2 Chunk 与 embedding
 
 - 以标题和段落为优先切分边界。
 - 使用 `chunk overlap` 降低跨段语义丢失。
-- embedding 支持批量处理、超时、基础重试和失败日志。
-- 入库和查询必须使用同一 embedding 模型。
-- 记录 embedding 模型配置，避免模型变更后新旧向量混用。
+- 默认使用本地 Sentence Transformers：`EMBEDDING_PROVIDER=local`、`EMBEDDING_MODEL=BAAI/bge-small-zh-v1.5`、`EMBEDDING_DEVICE=cpu`，通常输出 512 维向量。
+- `MODEL_NAME` 只供 LangExtract/chat 使用，不能回退成 Embedding 模型。
+- 只有显式设置 `EMBEDDING_PROVIDER=openai_compatible` 时才调用外部 Embedding 服务。
+- embedding 支持批量处理、有限数值/维度校验、超时、基础重试和失败日志。
+- 入库和查询必须使用同一 embedding provider/model；模型变更后必须重建 Chroma collection 并重新索引，避免新旧向量混用。
 
 
 
@@ -1111,8 +1114,8 @@ Django 停止时：Proxy 连接失败 → Axios rejected → Vue 显示 error。
 
 ### 10.5 可靠性
 
-- 外部 embedding 和 chat 请求必须设置超时。
-- 只对适合重试的网络/临时错误进行有限重试。
+- 外部 chat/LangExtract 请求必须设置超时；本地 Embedding 需要处理模型加载和推理失败。
+- 只有远程 `openai_compatible` provider 对适合重试的网络/临时错误进行有限重试。
 - 错误需要分类记录：参数、配置、网络、超时、模型、索引和数据库。
 - 发布与索引状态不能静默不一致；索引失败需要可观察和可重建。
 - Phase 1 允许同步索引；异步任务留到后续 Phase。
@@ -1132,8 +1135,11 @@ DATABASE_PATH=./data/db.sqlite3
 CHROMA_PERSIST_DIRECTORY=./data/chroma
 MODEL_BASE_URL=
 MODEL_API_KEY=
-MODEL_NAME=
-EMBEDDING_MODEL=
+MODEL_NAME=gpt-5.6-luna
+# 默认本地 Sentence Transformers Embedding
+EMBEDDING_PROVIDER=local
+EMBEDDING_MODEL=BAAI/bge-small-zh-v1.5
+EMBEDDING_DEVICE=cpu
 CHUNK_SIZE=1000
 CHUNK_OVERLAP=150
 EMBEDDING_BATCH_SIZE=32

@@ -116,7 +116,8 @@ Phase 1 前端页面：`/` 公开文章列表、`/articles/{id}` 文章详情、
 - Git
 - Python 3.13（当前验证版本：3.13.15）
 - Node.js 24.x 和 pnpm（当前前端使用 pnpm 锁定依赖）
-- 可访问的 OpenAI-compatible 模型服务（实现 embedding 和问答时需要）
+- 可访问的 OpenAI-compatible 模型服务（LangExtract 和问答模型需要）
+- Sentence Transformers 及本地模型缓存（默认使用本地 embedding）
 - MinerU 运行环境（支持 PDF 等原始文档导入时需要）
 - LangExtract 及其模型服务配置（需要结构化抽取和来源位置 metadata 时需要）
 
@@ -181,8 +182,12 @@ CHROMA_PERSIST_DIRECTORY=./data/chroma
 
 MODEL_BASE_URL=
 MODEL_API_KEY=
-MODEL_NAME=
-EMBEDDING_MODEL=
+MODEL_NAME=gpt-5.6-luna
+
+# 默认本地 BGE embedding；首次使用会从 Hugging Face 下载并缓存模型
+EMBEDDING_PROVIDER=local
+EMBEDDING_MODEL=BAAI/bge-small-zh-v1.5
+EMBEDDING_DEVICE=cpu
 
 CHUNK_SIZE=1000
 CHUNK_OVERLAP=150
@@ -195,10 +200,12 @@ LLM_TIMEOUT_SECONDS=30
 
 变量说明：
 
-- `MODEL_BASE_URL`：模型服务的兼容 API 地址。
-- `MODEL_API_KEY`：服务端模型密钥，只能由后端读取。
-- `MODEL_NAME`：回答模型名称。
-- `EMBEDDING_MODEL`：文章入库和问题查询共同使用的 embedding 模型。
+- `MODEL_BASE_URL`：LangExtract/chat 使用的 OpenAI-compatible API 地址，通常包含 `/v1`。
+- `MODEL_API_KEY`：LangExtract/chat 服务端模型密钥，只能由后端读取。
+- `MODEL_NAME`：LangExtract/chat 模型名称，例如 `gpt-5.6-luna`；不要把它当作 embedding 模型。
+- `EMBEDDING_PROVIDER`：`local`（默认）或显式选择 `openai_compatible`。
+- `EMBEDDING_MODEL`：文章入库和问题查询共同使用的 embedding 模型；本地默认是 512 维的 `BAAI/bge-small-zh-v1.5`。
+- `EMBEDDING_DEVICE`：本地 Sentence Transformers 的设备，例如 `cpu`、`mps` 或 `cuda`。
 - `DATABASE_PATH`：SQLite 本地数据库文件路径。
 - `CHROMA_PERSIST_DIRECTORY`：Chroma 本地持久化目录。
 - `CHUNK_SIZE`、`CHUNK_OVERLAP`：文章切分参数。
@@ -506,9 +513,9 @@ dist/
 
 更换 Django 或 Vite 端口，并同步修改 Proxy 配置；不要通过硬编码多个后端地址掩盖配置问题。
 
-### 7. 模型 API Key 或模型服务错误
+### 7. 模型 API Key 或 Embedding 模型错误
 
-确认只在后端 `.env` 配置模型变量，检查 `MODEL_BASE_URL`、`MODEL_API_KEY` 和 `MODEL_NAME`。Health API 不依赖模型服务，模型问题不应影响基础健康检查。
+确认只在后端 `.env` 配置模型变量。`MODEL_BASE_URL`、`MODEL_API_KEY` 和 `MODEL_NAME` 供 LangExtract/chat 使用；默认本地 Embedding 使用 `EMBEDDING_PROVIDER=local`、`EMBEDDING_MODEL=BAAI/bge-small-zh-v1.5` 和 `EMBEDDING_DEVICE=cpu`，首次使用可能下载 Hugging Face 模型。若显式使用 `openai_compatible`，才检查远程 Embedding endpoint 和对应的 Embedding 模型。Health API 不依赖模型服务，模型问题不应影响基础健康检查。
 
 ### 8. Chroma 写入冲突
 
