@@ -3,6 +3,7 @@ from django.utils import timezone     #时区工具
 from notifications.models import Notification    #通知模型
 from knowledge.models import ArticleChunk     #文章片段
 from .models import ArticleStatus, IndexStatus, ModerationEvent   #文章状态、索引状态、审核事件
+from knowledge.index_pipeline import run_article_index
 
 #检查操作者是否为管理员
 def ensure_admin(actor):
