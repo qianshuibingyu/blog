@@ -27,22 +27,31 @@ class IndexReport:
 def run_article_index(*, article_id:int) -> IndexReport:
     # 只允许已经进入 indexing 的文章开始运行
     article = _load_indexing_article(article_id)
+    # 使用内存中的当前步骤记录异常，避免依赖数据库步骤更新是否已提交
+    current_step = "content_validation"
     # 将可预期的业务或外部错误统一转换为失败状态
     try:
-        _set_step(article_id, "content_validation")      # 记录当前正在执行的阶段
+        _set_step(article_id, current_step)      # 记录当前正在执行的阶段
         prepared = prepare_article_source(article)
-        _set_step(article_id, "cleaning")        # 清洗前记录
+        current_step = "cleaning"               # 更新内存中的当前步骤
+        _set_step(article_id, current_step)      # 清洗前记录
         cleaned = clean_prepared_source(prepared)
-        _set_step(article_id, "chunking")
+        current_step = "chunking"                # 更新内存中的当前步骤
+        _set_step(article_id, current_step)      # 切分前记录
         chunks = MarkdownTextChunker().split(cleaned)
         # 空片段不能继续进入数据库和向量库
         if not chunks:
             raise IndexPipelineError("切分后没有有效片段")
-        _set_step(article_id, "persistence")       # 持久化前记录
+        current_step = "persistence"             # 更新内存中的当前步骤
+        _set_step(article_id, current_step)       # 持久化前记录
         persist_article_chunks(article_id=article_id, text_chunks=chunks)
-        _set_step(article_id, "embedding")    # 向量生成前记录
-        embedded_chunks = EmbeddingService(client=None).embed_article_chunks(article_id=article_id)
-        _set_step(article_id, "chroma")      # Chroma 写入前记录
+        current_step = "embedding"               # 更新内存中的当前步骤
+        _set_step(article_id, current_step)       # 向量生成前记录
+        embedded_chunks = EmbeddingService().embed_article_chunks(
+            article_id=article_id,
+        )
+        current_step = "chroma"                  # 更新内存中的当前步骤
+        _set_step(article_id, current_step)      # Chroma 写入前记录
         vector_count = ChromaVectorStore().upsert_article_chunks(article_id=article_id, embedded_chunks=embedded_chunks)
         # 最终确认版本未变化后发布
         _publish_if_current(article_id=article_id, content_hash=cleaned.content_hash)
@@ -56,7 +65,7 @@ def run_article_index(*, article_id:int) -> IndexReport:
     # 捕获所有步骤异常，确保文章不会保持假成功状态
     except Exception as exc:
         # 写入失败步骤和安全错误摘要
-        _mark_failed(article_id=article_id, step=_current_step(article_id), error=exc)
+        _mark_failed(article_id=article_id, step=current_step, error=exc)
         raise IndexPipelineError(f"文章索引失败：{type(exc).__name__}") from exc
 
 # 读取并检验文章当前状态
@@ -90,17 +99,22 @@ def _current_step(article_id:int) -> str:
 def _mark_failed(*, article_id:int, step:str, error:Exception) -> None:
     # 只保留步骤和异常类型，避免泄露密钥或正文
     safe_error = f"{step}: {type(error).__name__}"
+    update_values = {
+        "status": ArticleStatus.INDEX_FAILED,
+        "index_status": IndexStatus.FAILED,
+        "index_step": step,
+        "index_error": safe_error,
+        "updated_at": timezone.now()
+    }
+    if step == "embedding":
+        update_values["embedding_error"] = safe_error
+    if step == "chroma":
+        update_values["chroma_error"] = safe_error
     # 只把仍在当前索引状态的文章标记失败
     Article.objects.filter(
         pk=article_id,
         status=ArticleStatus.INDEXING,
-    ).update(
-        status=ArticleStatus.INDEX_FAILED,
-        index_status=IndexStatus.FAILED,
-        index_step=step,
-        index_error=safe_error,
-        updated_at=timezone.now(),
-    )
+    ).update(**update_values)
 
 # 在发布前重新检查文章和片段是否仍属于当前任务
 def _publish_if_current(*, article_id:int, content_hash:str) -> None:

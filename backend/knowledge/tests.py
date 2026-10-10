@@ -1,14 +1,10 @@
-<<<<<<< HEAD
-from django.test import TestCase, SimpleTestCase, override_settings
-from unittest.mock import patch
-=======
 from types import SimpleNamespace
 from django.test import TestCase, SimpleTestCase, override_settings
 from django.contrib.auth import get_user_model
+from django.urls import resolve
 from articles.models import Article, ArticleStatus, IndexStatus
 from unittest.mock import patch, MagicMock
 from .models import ArticleChunk
->>>>>>> 8de5a87733a78acc0970c3d9fbee2a0b78f40c31
 
 from .services.content_cleaner import(
     build_content_hash,
@@ -23,11 +19,8 @@ from .services.chunking import(
     MarkdownTextChunker,
 )
 from .services.errors import SourceValidationError
-<<<<<<< HEAD
-=======
 from .services.article_chunks import ChunkPersistenceError
 from .services.article_chunks import persist_article_chunks
->>>>>>> 8de5a87733a78acc0970c3d9fbee2a0b78f40c31
 from .document_types import ExtractionResult, ParsedDocument
 from .source_pipeline import prepare_source_for_indexing, PreparedSource
 from .source_router import (
@@ -35,8 +28,6 @@ from .source_router import (
     UnsupportedSourceError,
     build_document_from_source,
 )
-<<<<<<< HEAD
-=======
 
 from .llm import EmbeddingConfigurationError
 from .llm import EmbeddingError
@@ -46,6 +37,12 @@ from .llm import EmbeddedChunk
 
 from .vector_store import ChromaVectorStore, VectorStoreError
 from .index_pipeline import IndexPipelineError, run_article_index    # 导入阶段 8 真实入口
+from .retrieval import InvalidQuestionError, RetrievalServiceError, retrieve_public_chunks, RetrievalReport, RetrievedChunk      # 导入阶段 9 真实入口
+from .answering import AnswerModelError, answer_from_retrieval, build_prompt, clean_generated_answer, _source_payload     # 导入阶段 10 真实入口
+from rest_framework.test import APIRequestFactory        # 构造 DRF 请求
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_503_SERVICE_UNAVAILABLE       # 导入断言状态码
+from .api import KnowledgeChatAPIView                # 导入阶段 11 真实视图
+from .answering import AnswerResult                 # 导入阶段 10 输出对象
 
 # Create your tests here.
 """测试 Markdown 是否能进入统一对象"""
@@ -83,7 +80,7 @@ class SourceRouterTests(SimpleTestCase):
 
 """测试阶段2的编排，不调用真实 LangExtract"""
 class SourcePipelineTests(SimpleTestCase):
-    @patch("knowledge.langextract_adapter.extract_structure")
+    @patch("knowledge.source_pipeline.extract_structure")
     def test_pipeline_returns_prepared_source(self, mock_extract):
         # 用固定结果代替真实抽取服务
         mock_extract.return_value = ExtractionResult(
@@ -234,6 +231,46 @@ class ContentCleanerTests(SimpleTestCase):
         # 使用临时配置验证最大长度限制
         with self.assertRaises(SourceValidationError):
             validate_markdown_content("123456")
+    
+    def test_structure_table_and_code_are_preserved(self):
+        prepared = self.make_prepared_source(
+            "# RAG\n\n"
+            "- 保留列表\n\n"
+            "| 名称 | 说明 |\n"
+            "| Chroma | 向量数据库 |\n\n"
+            "```python\nprint('hello')\n```"
+        )
+        result = clean_prepared_source(prepared)
+        self.assertIsInstance(result, CleanedDocument)
+        self.assertIn("# RAG", result.cleaned_markdown)
+        self.assertIn("- 保留列表", result.cleaned_markdown)
+        self.assertIn("Chroma", result.plain_text)
+        self.assertIn("向量数据库", result.plain_text)
+        self.assertIn("print('hello')", result.plain_text)
+
+    def test_dangerous_content_is_removed(self):
+        prepared = self.make_prepared_source(
+            "# 安全测试\n\n"
+            "<script>alert('xss')</script>\n\n"
+            "<div onclick=\"alert('xss')\">正文</div>\n\n"
+            "危险链接"
+        )
+        result = clean_prepared_source(prepared)
+        self.assertNotIn("<script", result.sanitized_html.lower())
+        self.assertNotIn("onclick", result.sanitized_html.lower())
+        self.assertNotIn("javascript:", result.sanitized_html.lower())
+        self.assertIn("正文", result.plain_text)
+    
+    def test_cleaning_does_not_mutate_input(self):
+        raw = "# 标题\r\n\r\n这是一段足够长的正文"
+        prepared = self.make_prepared_source(raw)
+        clean_prepared_source(prepared)
+        self.assertEqual(prepared.document.markdown, raw)
+
+    def test_hash_is_deterministic(self):
+        self.assertEqual(build_content_hash("相同正文"), build_content_hash("相同正文"))
+        self.assertNotEqual(build_content_hash("正文 A"), build_content_hash("正文 B"))
+
 
 """验证阶段 4 的切分契约"""
 class TextChunkerTests(SimpleTestCase):
@@ -310,8 +347,6 @@ class ChunkConfigTests(SimpleTestCase):
     def test_minimum_cannot_exceed_size(self):
         with self.assertRaises(ChunkingError):
             ChunkConfig(10, 2, 11, 10).validate()
-<<<<<<< HEAD
-=======
 
 
 # 定义阶段 5 数据库测试
@@ -497,6 +532,48 @@ class EmbeddingServiceTests(SimpleTestCase):
         with self.assertRaises(EmbeddingResponseError):
             EmbeddingService(client=bad).embed_texts(["一", "二"])
 
+# 验证文章片段映射结果包含 provider 和向量维度
+class ArticleEmbeddingMappingTests(TestCase):
+    # 创建测试文章和文章片段
+    def setUp(self):
+        user = get_user_model().objects.create_user(
+            username="embedding-article-user",
+            password="test-password",
+        )
+        self.article = Article.objects.create(
+            author=user,
+            title="Embedding 映射测试",
+            content="# 测试正文",
+        )
+        self.chunk = ArticleChunk.objects.create(
+            article=self.article,
+            chunk_index=0,
+            content="测试片段正文",
+        )
+
+    # 验证文章片段向量记录了 provider 和维度
+    @override_settings(
+        EMBEDDING_PROVIDER="local",
+        EMBEDDING_MODEL="test-local-model",
+        EMBEDDING_BATCH_SIZE=2,
+    )
+    # 定义不会访问网络的假本地模型
+    def test_article_chunks_record_provider_and_dimension(self):
+        class FakeLocalModel:
+            def encode(self, texts, **kwargs):
+                return [[0.1, 0.2] for _ in texts]
+
+        result = EmbeddingService(
+            client=FakeLocalModel(),
+        ).embed_article_chunks(
+            article_id=self.article.id,
+        )
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].article_chunk_id, self.chunk.id)
+        self.assertEqual(result[0].embedding_provider, "local")
+        self.assertEqual(result[0].embedding_dimension, 2)
+
+
 # 定义阶段 7 数据库和假 Chroma 测试
 class ChromaVectorStoreTests(TestCase):
     # 准备一篇文章和一个片段
@@ -516,22 +593,62 @@ class ChromaVectorStoreTests(TestCase):
     # 验证向量写入和 ID 回写
     def test_upsert_writes_stable_id_and_mapping(self):
         client, collection = self.fake_client()
-        item = EmbeddedChunk(self.chunk.id, 0, "正文", [0.1,0.2], "test-model")
+        item = EmbeddedChunk(
+            article_chunk_id=self.chunk.id,
+            chunk_index=0,
+            content="正文",
+            embedding=[0.1, 0.2],
+            embedding_model="test-model",
+            embedding_provider="local",
+            embedding_dimension=2,
+        )
         count = ChromaVectorStore(client=client).upsert_article_chunks(article_id=self.article.id, embedded_chunks=[item])
         self.assertEqual(count, 1)
         self.chunk.refresh_from_db()
         self.assertEqual(self.chunk.vector_document_id, f"article:{self.article.id}:chunk:0")
         collection.upsert.assert_called_once()
+        metadata = collection.upsert.call_args.kwargs["metadatas"][0]
+        self.assertEqual(metadata["embedding_provider"], "local")
+        self.assertEqual(metadata["embedding_dimension"], "2")
+        self.assertEqual(metadata["embedding_model"], "test-model")
 
-    # 验证过期正文不会写入 Chroma
+        # 验证过期正文不会写入 Chroma
     def test_mismatched_content_is_rejected(self):
         client, collection = self.fake_client()
-        item = EmbeddedChunk(self.chunk.id, 0, "旧正文", [0.1,0.2], "test-model")
-        # 断言服务拒绝过期结果
+
+        item = EmbeddedChunk(
+            article_chunk_id=self.chunk.id,
+            chunk_index=0,
+            content="旧正文",
+            embedding=[0.1, 0.2],
+            embedding_model="test-model",
+            embedding_provider="local",
+            embedding_dimension=2,
+        )
+
         with self.assertRaises(VectorStoreError):
-            ChromaVectorStore(client=client).upsert_article_chunks(article_id=self.article.id, embedded_chunks=[item])
-        # 确认校验失败前没有写库
+            ChromaVectorStore(
+                client=client,
+            ).upsert_article_chunks(
+                article_id=self.article.id,
+                embedded_chunks=[item],
+            )
+
         collection.upsert.assert_not_called()
+
+    @override_settings(
+    CHROMA_COLLECTION_NAME="ownerblog_articles",
+    EMBEDDING_COLLECTION_VERSION="model-v1",
+    )
+    def test_collection_name_contains_embedding_version(self):
+        client, collection = self.fake_client()
+        ChromaVectorStore(client=client)
+        client.get_or_create_collection.assert_called_once_with(
+            name="ownerblog_articles_model-v1"
+        )
+
+
+
 # 定义阶段 8 编排测试
 class IndexPipelineTests(TestCase):
     # 准备处于 indexing 的测试文章
@@ -541,7 +658,7 @@ class IndexPipelineTests(TestCase):
         self.article = Article.objects.create(
             author=user,
             title="编排测试",
-            content="# 正文",
+            content="# 编排测试\n\n这是一段足够长的测试正文，用于验证索引流程状态和错误记录。",
             status=ArticleStatus.INDEXING,
             index_status=IndexStatus.INDEXING,
         )
@@ -583,3 +700,311 @@ class IndexPipelineTests(TestCase):
         # 确认文章进入索引失败、索引状态进入失败
         self.assertEqual(self.article.status, ArticleStatus.INDEX_FAILED)
         self.assertEqual(self.article.index_status, IndexStatus.FAILED)
+    
+    # 模拟 Embedding 服务失败
+    def test_embedding_failure_records_embedding_error(self):
+        with patch(
+            "knowledge.index_pipeline.EmbeddingService"
+        )as embedding_service:
+        # 配置 Embedding 实例在生成向量时抛出异常
+            embedding_service.return_value.embed_article_chunks.side_effect = (
+                RuntimeError("embedding failed")
+            )
+            # 索引流程必须抛出统一的索引异常
+            with self.assertRaises(IndexPipelineError):
+                run_article_index(article_id=self.article.id)
+        # 重新读取数据库中的文章状态
+        self.article.refresh_from_db()
+        # 文章必须进入索引失败状态
+        self.assertEqual(self.article.status, ArticleStatus.INDEX_FAILED)
+        self.assertEqual(self.article.index_status, IndexStatus.FAILED)
+        # Embedding 错误字段必须有内容
+        self.assertTrue(self.article.embedding_error)
+        # 失败文章不能被发布
+        self.assertNotEqual(self.article.status, ArticleStatus.PUBLISHED)
+
+    # 同时模拟 Embedding 成功和 Chroma 写入失败
+    def test_chroma_failure_records_chroma_error(self):
+        with patch(
+            "knowledge.index_pipeline.EmbeddingService"
+        ) as embedding_service, patch(
+            "knowledge.index_pipeline.ChromaVectorStore"
+        ) as vector_store:
+            # 模拟 Embedding 返回一个片段向量
+            embedding_service.return_value.embed_article_chunks.return_value = [
+                SimpleNamespace()
+            ]
+            # 模拟 Chroma 写入时抛出异常
+            vector_store.return_value.upsert_article_chunks.side_effect = (
+                RuntimeError("chroma failed")
+            )
+            # 索引流程必须抛出统一的索引异常
+            with self.assertRaises(IndexPipelineError):
+                run_article_index(article_id=self.article.id)
+        # 重新读取数据库中的文章状态
+        self.article.refresh_from_db()
+        # 文章必须进入索引失败状态
+        self.assertEqual(self.article.status, ArticleStatus.INDEX_FAILED)
+        self.assertEqual(self.article.index_status, IndexStatus.FAILED)
+        # Chroma 错误字段必须有内容
+        self.assertTrue(self.article.chroma_error)
+        # 失败文章不能被发布
+        self.assertNotEqual(self.article.status, ArticleStatus.PUBLISHED)
+
+    # 准备一个假的 Embedding 结果
+    def test_embedding_is_called_on_service_instance(self):
+        fake_embedded_chunks = [SimpleNamespace()]
+        # 只替换实例方法，保留 EmbeddingService 类本身
+        with patch.object(
+            EmbeddingService,
+            "embed_article_chunks",
+            return_value=fake_embedded_chunks,
+        ) as embed_chunks, patch(
+            "knowledge.index_pipeline.ChromaVectorStore"
+        ) as vector_store, patch(
+            "knowledge.index_pipeline.prepare_article_source"
+        ) as prepare, patch(
+            "knowledge.index_pipeline.clean_prepared_source"
+        ) as clean, patch(
+            "knowledge.index_pipeline.MarkdownTextChunker"
+        )as chunker, patch(
+            "knowledge.index_pipeline.persist_article_chunks"
+        ):
+            # 模拟 Stage 2 返回的来源对象
+            prepare.return_value = SimpleNamespace()
+            # 模拟 Stage 3 返回的清洗对象
+            clean.return_value = SimpleNamespace(content_hash="hash-001")
+            # 模拟 Stage 4 返回一个文本片段
+            chunker.return_value.split.return_value = [SimpleNamespace()]
+            # 模拟 Chroma 写入成功
+            vector_store.return_value.upsert_article_chunks.return_value = 1
+            # 执行真实索引编排函数
+            run_article_index(article_id=self.article.id)
+        # 确认方法是通过 EmbeddingService 实例调用的
+        embed_chunks.assert_called_once_with(article_id=self.article.id)
+
+    
+
+# 定义阶段 9 的公开检索测试
+class PublicRetrievalTests(SimpleTestCase):
+    # 验证空问题不会调用外部服务
+    def test_empty_question_is_rejected(self):
+        # 断言输入异常类型正确
+        with self.assertRaises(InvalidQuestionError):
+            # 传入空白问题
+            retrieve_public_chunks(question="   ", embedding_service=MagicMock(), vector_store=MagicMock())
+
+    # 替换真实 ORM 管理器，避免依赖测试数据
+    @patch("knowledge.retrieval.ArticleChunk.objects")
+    # 验证结果正文来自数据库
+    def test_only_public_database_chunks_are_returned(self, objects):
+        # 构造公开文章对象、数据库片段、让 ORM 链返回公开片段、构造固定查询向量服务和Chroma结果
+        article = SimpleNamespace(id=1, title="公开文章")
+        chunk = SimpleNamespace(id=10, article_id=1, article=article, chunk_index=0, content="数据库正文", vector_document_id="article:1:chunk:0")
+        objects.filter.return_value.select_related.return_value = [chunk]
+        embedder = SimpleNamespace(embed_query=lambda valuer:[0.1, 0.2])
+        store = SimpleNamespace(query=lambda vector, top_k: [{"id": "article:1:chunk:0", "distance": 0.1}])
+        # 覆盖测试阈值
+        with self.settings(SIMILARITY_THRESHOLD=0.5, MAX_RETRIEVED_CHUNKS=5, CHROMA_QUERY_TOP_K=20):
+            # 执行真实检索入口
+            report = retrieve_public_chunks(question="公开文章内容", embedding_service=embedder, vector_store=store)
+            # 确认正文不是来自 Chroma 返回值、接收数量正确
+            self.assertEqual(report.results[0].content, "数据库正文")
+            self.assertEqual(report.accepted_count, 1)
+
+# 定义阶段 10 回答服务测试
+class AnsweringServiceTests(SimpleTestCase):
+    # 验证回答清洗会删除模型引用标记和重复来源，但保留实际答案。
+    def test_clean_generated_answer_removes_model_markup(self):
+        raw = "蓝色鲸鱼 9183【source-2】。\n来源：Cosine索引验收文章"
+        self.assertEqual(clean_generated_answer(raw), "蓝色鲸鱼 9183。")
+
+    # 构造带真实来源字段的检索报告
+    def report_with_source(self):
+        item = RetrievedChunk(1, "公开文章", 10, 0, "资料正文", 0.9, "article:1:chunk:0")
+        # 返回阶段 9 报告
+        return RetrievalReport("测试问题", [item], 1, 1)
+    
+    # 验证无来源时直接 bstained
+    def test_empty_report_does_not_call_model(self):
+        client = MagicMock()
+        report = RetrievalReport("没有档案的问题", [], 0, 0)
+        result = answer_from_retrieval(report, client=client)
+        self.assertEqual(result.status, "abstained")
+        client.chat.completions.create.assert_not_called()
+
+    # 设置测试模型配置、验证成功回答携带来源
+    @override_settings(MODEL_API_KEY="test-key", MODEL_BASE_URL="https://example.invalid", MODEL_NAME="test-model", LLM_TIMEOUT_SECONDS=1)
+    def test_success_returns_real_sources(self):
+        # 构造正常模型响应、假模型客户端
+        response = SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content="有依据的回答"))])
+        client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=lambda ** kwargs:response)))
+        # 执行回答服务
+        result = answer_from_retrieval(self.report_with_source(), client=client)
+        # 确认回答状态和来源来自检索结果
+        self.assertEqual(result.status, "grounded")
+        self.assertEqual(result.sources[0]["article_id"], 1)
+
+    # 设置测试模型配置
+    @override_settings(MODEL_API_KEY="test-key", MODEL_BASE_URL="https://example.invalid", MODEL_NAME="test-model", LLM_TIMEOUT_SECONDS=1)
+    # 验证模型空响应不会伪装成功
+    def test_empty_model_response_is_error(self):
+        # 构造空回答响应、假模型客户端
+        response = SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=""))])
+        client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=lambda **kwarts:response)))
+        # 断言空回答会抛出明确异常
+        with self.assertRaises(AnswerModelError):
+            # 执行回答服务
+            answer_from_retrieval(self.report_with_source(), client=client)
+
+        # 设置测试模型配置
+        @override_settings(MODEL_API_KEY="test-key", MODEL_BASE_URL="https://example.invalid", MODEL_NAME="test-model", LLM_TIMEOUT_SECONDS=1)
+        # 验证模型异常被转换为统一错误
+        def test_model_exception_is_wrapped(self):
+            # 定义总是失败的假模型调用
+            def raise_error(**kwargs):
+                raise RuntimeError("network failure")
+            # 构造失败客户端
+            client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=raise_error)))
+            # 断言服务抛出统一回答异常
+            with self.assertRaises(AnswerModelError):
+                answer_from_retrieval(self.report_with_source(), client=client)
+
+    # 将模型上下文最大长度临时设置为20，验证 Prompt 中的资料不会超过配置长度
+    @override_settings(MAX_CONTEXT_CHARS=20)
+    def test_prompt_context_is_limited(self):
+        item = RetrievedChunk(
+            article_id=1,
+            article_title="公开文章",
+            article_chunk_id=10,
+            chunk_index=0,
+            content="这是一个超过二十个字符的长资料内容。",
+            score=0.9,
+            vector_document_id="article:1:chunk:0",
+        )
+        report = RetrievalReport(
+            question="测试问题",
+            results=[item],
+            candidate_count=1,
+            accepted_count=1,
+        )
+        prompt = build_prompt(report)
+        self.assertIn(
+            "资料：",
+            prompt,
+        )
+        self.assertLessEqual(
+            len(prompt.split("资料：\n", 1)[1]),
+            20,
+        )
+    
+    # 验证来源包含文章详情链接
+    def test_sources_include_article_url(self):
+        report = self.report_with_source()
+        # 使用最小假模型响应，测试只关注来源链接字段。
+        response = SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content="有依据的回答"))])
+        client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=lambda **kwargs: response)))
+        result = answer_from_retrieval(
+            report,
+            client=client,
+        )
+        self.assertEqual(
+            result.sources[0]["article_url"],
+            "/articles/1",
+        )
+
+# 定义阶段 11 API 测试
+class KnowledgeChatAPITests(SimpleTestCase):
+    # 为每个测试创建请求工厂
+    def setUp(self):
+        self.factory = APIRequestFactory()
+    # 替换回答服务、检索服务
+    @patch("knowledge.api.answer_from_retrieval")
+    @patch("knowledge.api.retrieve_public_chunks")
+    # 验证成功响应结构
+    def test_success_response_contains_answer_and_sources(self, retrieve, answer):
+        retrieve.return_value = RetrievalReport("问题", [], 0, 0)
+        answer.return_value = AnswerResult("abstained", "资料不足", [])
+        request = self.factory.post("/api/knowledge/chat", {"question":"问题"}, format="json")
+        response = KnowledgeChatAPIView.as_view()(request)
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.data["status"], "abstained")
+        retrieve.assert_called_once_with(question="问题")
+
+    # 验证空问题返回参数错误
+    def test_invalid_payload_returns_400(self):
+        request = self.factory.post("/api/knowledge/chat", {"question":""}, format="json")
+        # 模拟阶段 9  参数校验失败
+        with patch("knowledge.api.retrieve_public_chunks", side_effect=InvalidQuestionError("question 不能为空")):
+            response = KnowledgeChatAPIView.as_view()(request)
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+
+    # 验证外部检索或模型失败时返回稳定的服务不可用响应
+    def test_service_failure_returns_503(self):
+        request = self.factory.post("/api/knowledge/chat", {"question": "问题"}, format="json")
+        with patch("knowledge.api.retrieve_public_chunks", side_effect=RetrievalServiceError("检索失败")):
+            response = KnowledgeChatAPIView.as_view()(request)
+        self.assertEqual(response.status_code, HTTP_503_SERVICE_UNAVAILABLE)
+        self.assertEqual(response.data["error"], "知识问答服务暂时不可用，请稍后重试")
+
+
+class ArticleContentPreservationTests(TestCase):
+    @patch("knowledge.langextract_adapter.extract_structure")
+    def test_cleaning_does_not_modify_article_content(self, extract_structure):
+        extract_structure.return_value = ExtractionResult()
+        user = get_user_model().objects.create_user(
+            username="stage3-user",
+            password="password",
+        )
+        raw = "# 原始标题\r\n\r\n这是一段足够长的原始正文。"
+        article = Article.objects.create(
+            author=user,
+            title="Stage 3 测试",
+            content=raw,
+        )
+        prepared = prepare_source_for_indexing(
+            source_type="markdown",
+            source_name=article.title,
+            markdown=article.content,
+        )
+        clean_prepared_source(prepared)
+        article.refresh_from_db()
+        self.assertEqual(article.content, raw)
+
+# 测试知识问答 URL 是否正确连接到视图
+class KnowledgeRouteTests(SimpleTestCase):
+    # 为每个路由测试创建 DRF 请求工厂
+    def setUp(self):
+        self.factory = APIRequestFactory()
+
+    # 解析完整接口路径
+    def test_chat_route_resolves(self):
+        match = resolve("/api/knowledge/chat")
+        self.assertEqual(match.view_name, "knowledge-chat",)
+    
+    # 构造一个模拟请求
+    def test_grounded_response_contains_required_fields(self):
+        request = self.factory.post(
+            "/api/knowledge/chat",
+            {"question": "什么事 RAG？"},
+            format="json",
+        )
+        report = RetrievalReport(
+            "什么是 RAG？", [], 0, 0,
+        )
+        answer = AnswerResult(
+            "abstained",
+            "没有足够资料回答该问题",
+            [],
+        )
+        with patch("knowledge.api.retrieve_public_chunks", return_value=report,):
+            with patch(
+                "knowledge.api.answer_from_retrieval",
+                return_value=answer,
+            ):
+                response = KnowledgeChatAPIView.as_view()(request)
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(set(response.data.keys()), {"status", "answer", "sources"},)
+        self.assertEqual(response.data["status"], "abstained")
+        self.assertEqual(response.data["answer"], "没有足够资料回答该问题",)
+        self.assertEqual(response.data["sources"], [])

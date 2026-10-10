@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
+from unittest.mock import patch
 
 from .models import Article, ArticleStatus, IndexStatus, ModerationEvent
 from notifications.models import Notification
@@ -352,3 +353,16 @@ class ArticleAPITests(TestCase):
         # 从数据库重新读取文章
         self.draft_article.refresh_from_db()
         self.assertEqual(self.draft_article.status, ArticleStatus.DRAFT)
+
+@patch("articles.services.run_article_index")
+def test_approve_starts_index_after_commit(self, run_index):
+    admin = get_user_model().objects.create_user(
+        username="approve-trigger-admin",
+        password="password",
+        is_staff=True,
+    )
+    self.draft_article.status = ArticleStatus.PENDING_REVIEW
+    self.draft_article.save()
+    with self.captureOnCommitCallbacks(execute=True):
+        approve_article(article=self.draft_article, actor=admin)
+    run_index.assert_called_once_with(article_id=self.draft_article.id)

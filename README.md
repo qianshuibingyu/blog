@@ -116,12 +116,8 @@ Phase 1 前端页面：`/` 公开文章列表、`/articles/{id}` 文章详情、
 - Git
 - Python 3.13（当前验证版本：3.13.15）
 - Node.js 24.x 和 pnpm（当前前端使用 pnpm 锁定依赖）
-<<<<<<< HEAD
-- 可访问的 OpenAI-compatible 模型服务（实现 embedding 和问答时需要）
-=======
 - 可访问的 OpenAI-compatible 模型服务（LangExtract 和问答模型需要）
 - Sentence Transformers 及本地模型缓存（默认使用本地 embedding）
->>>>>>> 8de5a87733a78acc0970c3d9fbee2a0b78f40c31
 - MinerU 运行环境（支持 PDF 等原始文档导入时需要）
 - LangExtract 及其模型服务配置（需要结构化抽取和来源位置 metadata 时需要）
 

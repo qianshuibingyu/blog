@@ -1,6 +1,11 @@
 from django.contrib import admin
 from .models import Article, ModerationEvent
-from .services import approve_article, reject_article, take_down_article
+from .services import (
+    approve_article,
+    reject_article,
+    retry_article_index,
+    take_down_article,
+)
 
 # Register your models here.
 # 注册文章 Admin
@@ -46,6 +51,7 @@ class ArticleAdmain(admin.ModelAdmin):
         "approve_selected",
         "reject_selected",
         "take_down_selected",
+        "retry_selected_index",
     )
 
     #通过选中的待审核文章
@@ -85,6 +91,12 @@ class ArticleAdmain(admin.ModelAdmin):
             )
         #显示操作结果
         self.message_user(request, "文章已下架。")
+    
+    @admin.action(description="重试选中的失败或过期索引")
+    def retry_selected_index(self, request, queryset):
+        for article in queryset:
+            retry_article_index(article=article, actor=request.user)
+        self.message_user(request, "选中文章已重新进入索引流程")
 
 # 注册审核历史
 @admin.register(ModerationEvent)

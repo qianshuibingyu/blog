@@ -37,6 +37,8 @@ class EmbeddedChunk:
     content: str
     embedding: list[float]
     embedding_model: str
+    embedding_provider: str
+    embedding_dimension: int
 
 
 @lru_cache(maxsize=4)
@@ -112,11 +114,13 @@ class EmbeddingService:
         vectors = self.embed_texts([chunk.content for chunk in chunks])
         return [
             EmbeddedChunk(
-                chunk.id,
-                chunk.chunk_index,
-                chunk.content,
-                vector,
-                self.model,
+                article_chunk_id=chunk.id,
+                chunk_index=chunk.chunk_index,
+                content=chunk.content,
+                embedding=vector,
+                embedding_model=self.model,
+                embedding_provider=self.provider,
+                embedding_dimension=len(vector),
             )
             for chunk, vector in zip(chunks, vectors)
         ]

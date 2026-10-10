@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from typing import Any
 from .document_types import ExtractionResult, ParsedDocument
 from .source_router import build_document_from_source
+from .langextract_adapter import LangExtractAdapterError, extract_structure
 
 @dataclass
 class PreparedSource:
@@ -30,12 +31,18 @@ def prepare_source_for_indexing(
         source_path=source_path,
         source_name=source_name,
     )
-    
-    # 第二步：延迟导入 LangExtract，避免启动时依赖外部服务
-    from .langextract_adapter import extract_structure
 
     # 第三步：对统一文档执行结构化抽取
-    extraction = extract_structure(document=document)
+    try:
+        extraction = extract_structure(document=document)
+    except LangExtractAdapterError as exc:
+        extraction = ExtractionResult(
+            fields={},
+            source_spans=[],
+            extractor_name="none",
+            extractor_version="",
+            warnings=[f"LangExtract unavailable: {type(exc).__name__}"],
+        )
 
     # 第四步：把来源和抽取信息汇总给后续清洗/切分阶段
     metadata = {

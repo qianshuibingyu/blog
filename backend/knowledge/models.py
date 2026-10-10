@@ -14,6 +14,10 @@ class ArticleChunk(models.Model):
     # 保存片段在文章中的顺序、清晰后的文章片段
     chunk_index = models.PositiveIntegerField()
     content = models.TextField()
+    content_hash = models.CharField(max_length=64, db_index=True, default="")
+    article_version = models.PositiveIntegerField(default=1)
+    section = models.CharField(max_length=200, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
     vector_document_id = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

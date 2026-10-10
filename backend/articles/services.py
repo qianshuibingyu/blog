@@ -2,6 +2,7 @@ from django.db import transaction     #事务工具
 from django.utils import timezone     #时区工具
 from notifications.models import Notification    #通知模型
 from knowledge.models import ArticleChunk     #文章片段
+from knowledge.vector_store import ChromaVectorStore
 from .models import ArticleStatus, IndexStatus, ModerationEvent   #文章状态、索引状态、审核事件
 from knowledge.index_pipeline import run_article_index
 
@@ -12,6 +13,7 @@ def ensure_admin(actor):
 
 # 清理文章数据库中的索引映射
 def cleanup_article_resources(article):
+    ChromaVectorStore().delete_article_vectors(article_id=article.id)
     ArticleChunk.objects.filter(article=article).delete()
 
 #管理员通过待审核文章
@@ -26,6 +28,7 @@ def approve_article(*, article, actor):
     # 进入索引流程，不能直接公开
     article.status = ArticleStatus.INDEXING
     article.index_status = IndexStatus.INDEXING
+    article.index_started_at = timezone.now()
     # 后续阶段从这个步骤继续处理
     article.index_step = "content_validation"
     # 新的一次索引尝试不应显示上一次失败留下的错误
@@ -36,6 +39,8 @@ def approve_article(*, article, actor):
     article.reviewed_by = actor
     article.reviewed_at = timezone.now()
 
+    article.version += 1
+
     # 保存本次修改字段
     article.save(
         update_fields=[
@@ -43,11 +48,13 @@ def approve_article(*, article, actor):
             "index_status",
             "index_step",
             "index_error",
+            "index_started_at",
             "embedding_error",
             "chroma_error",
             "reviewed_by",
             "reviewed_at",
             "updated_at",
+            "version",
         ],
     )
 
@@ -60,6 +67,11 @@ def approve_article(*, article, actor):
         from_status=old_status,
         to_status=article.status,
     )
+    # 数据库提交后才启动索引，避免任务读取未提交的文章
+    transaction.on_commit(
+        lambda article_id=article.id: run_article_index(article_id=article_id)
+    )
+    
     #返回更新后的文章
     return article
 
@@ -124,3 +136,41 @@ def take_down_article(*, article, actor, reason):
     cleanup_article_resources(article)
     article.delete()
 
+"""管理员重新启动失败或过期文章的索引"""
+@transaction.atomic
+def retry_article_index(*, article, actor):
+    ensure_admin(actor)
+    retryable = (
+        article.status == ArticleStatus.INDEX_FAILED
+        and article.index_status == IndexStatus.FAILED
+    ) or article.index_status == IndexStatus.STALE
+    if not retryable:
+        raise ValueError("只有索引失败或过期文章可以重试")
+    old_status = article.status
+    article.status = ArticleStatus.INDEXING
+    article.index_status = IndexStatus.INDEXING
+    article.index_step = "content_validation"
+    article.index_error = ""
+    article.index_started_at = timezone.now()
+    article.embedding_error = ""
+    article.chroma_error = ""
+    article.version += 1
+    article.save(
+        update_fields=[
+            "status", "index_status", "index_step",
+            "index_error", "index_started_at", "embedding_error", "chroma_error", "updated_at",
+            "version",
+        ]
+    )
+    ModerationEvent.objects.create(
+        object_type="article",
+        object_id=article.id,
+        actor=actor,
+        action="retry_index",
+        from_status=old_status,
+        to_status=article.status,
+    )
+    transaction.on_commit(
+        lambda article_id=article.id: run_article_index(article_id=article_id)
+    )
+    return article

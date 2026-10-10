@@ -95,6 +95,7 @@ class Article(models.Model):
     chroma_error = models.TextField(blank=True)
     #记录索引完成时间
     indexed_at = models.DateTimeField(null=True, blank=True)
+    index_started_at = models.DateTimeField(null=True, blank=True)
     #保存正文哈希
     content_hash = models.CharField(max_length=64, blank=True)
     #保存索引版本

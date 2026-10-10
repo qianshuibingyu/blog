@@ -48,5 +48,6 @@ urlpatterns = [
         "api/articles/<int:pk>/submit-review",
         ArticleSubmitReviewAPIView.as_view(),
         name="article-submit-review",
-    )
+    ),
+    path("api/knowledge/", include("knowledge.urls")),
 ]

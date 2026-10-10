@@ -152,11 +152,9 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 CSRF_COOKIE_NAME = "csrftoken"
-<<<<<<< HEAD
-SCRF_HEADER_NAME = "HTTP_X_CSRFTOKEN"
-=======
+
 CSRF_HEADER_NAME = "HTTP_X_CSRFTOKEN"
->>>>>>> 8de5a87733a78acc0970c3d9fbee2a0b78f40c31
+
 
 # 防止超大 Markdown 进入渲染器并占用过多内存
 CONTENT_MAX_LENGTH = int(
@@ -175,9 +173,7 @@ RAG_CHUNK_OVERLAP = int(os.getenv("RAG_CHUNK_OVERLAP", "150"))
 # 小片段合并阈值
 RAG_MIN_CHUNK_SIZE = int(os.getenv("RAG_MIN_CHUNK_SIZE", "40"))
 # 防止异常文档产生无限数量片段
-<<<<<<< HEAD
-RAG_MAX_CHUNKS = int(os.getenv("RAG_MAX_CHUNKS", "1000"))
-=======
+
 RAG_MAX_CHUNKS = int(os.getenv("RAG_MAX_CHUNKS", "1000"))
 
 # 读取 OpenAI-compatible 服务根地址
@@ -205,6 +201,8 @@ EMBEDDING_RETRY_BACKOFF_SECONDS = float(os.getenv("EMBEDDING_RETRY_BACKOFF_SECON
 LLM_TIMEOUT_SECONDS = int(os.getenv("LLM_TIMEOUT_SECONDS", "30"))
 # 让 Embedding 复用项目超时配置
 EMBEDDING_TIMEOUT_SECONDS = LLM_TIMEOUT_SECONDS
+MAX_CONTEXT_CHARS = int(os.getenv("MAX_CONTEXT_CHARS", "8000"))
+MAX_ANSWER_CHARS = int(os.getenv("MAX_ANSWER_CHARS", "2000"))
 
 # 读取 Chroma 本地持久化目录配置
 CHROMA_PERSIST_DIRECTORY = os.getenv("CHROMA_PERSIST_DIRECTORY", "./data/chroma")
@@ -212,4 +210,14 @@ CHROMA_PERSIST_DIRECTORY = os.getenv("CHROMA_PERSIST_DIRECTORY", "./data/chroma"
 CHROMA_PERSIST_DIRECTORY = str((BASE_DIR / CHROMA_PERSIST_DIRECTORY).resolve()) if not os.path.isabs(CHROMA_PERSIST_DIRECTORY) else CHROMA_PERSIST_DIRECTORY
 # 读取固定的 Chroma collection 名称
 CHROMA_COLLECTION_NAME = os.getenv("CHROMA_COLLECTION_NAME", "ownerblog_articles")
->>>>>>> 8de5a87733a78acc0970c3d9fbee2a0b78f40c31
+
+# 限制用户问题长度
+QUERY_MAX_LENGTH = int(os.getenv("QUERY_MAX_LENGTH", "1000"))
+# 设置候选数量、最低相似度、最终结果上限
+CHROMA_QUERY_TOP_K = int(os.getenv("CHROMA_QUERY_TOP_K", "20"))
+SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.75"))
+MAX_RETRIEVED_CHUNKS = int(os.getenv("MAX_RETRIEVED_CHUNKS", "5"))
+EMBEDDING_COLLECTION_VERSION = os.getenv(
+    "EMBEDDING_COLLECTION_VERSION",
+    "bge-small-zh-v1.5-local-v1",
+)

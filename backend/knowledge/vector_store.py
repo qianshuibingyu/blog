@@ -37,12 +37,18 @@ class ChromaVectorStore:
         # 创建或复用本地客户端
         self.client = client or chromadb.PersistentClient(path=settings.CHROMA_PERSIST_DIRECTORY)
         # 读取并清理 collection 名称
-        collection_name = str(settings.CHROMA_COLLECTION_NAME).strip()
+        collection_name = (
+            f"{settings.CHROMA_COLLECTION_NAME}_"
+            f"{settings.EMBEDDING_COLLECTION_VERSION}"
+        ).strip()
         # collection 名称为空时无法安全写入
         if not collection_name:
             raise VectorStoreError("CHROMA_COLLECTION_NAME 不能为空")
         # 获取固定 collection
-        self.collection = self.client.get_or_create_collection(name=collection_name)
+        self.collection = self.client.get_or_create_collection(
+            name=collection_name,
+            metadata={"hnsw:space": "cosine"},
+        )
         
     # 幂等写入一篇文章的全部向量
     def upsert_article_chunks(self, *, article_id:int, embedded_chunks:list[EmbeddedChunk]) -> int:
@@ -140,9 +146,18 @@ class ChromaVectorStore:
 
     # 构造 Chroma 支持的标量 metadata
     def _build_metadata(self, article:Article, chunk:ArticleChunk, item:EmbeddedChunk) -> dict[str, str]:
-        return {"article_id":str(article.id), "article_chunk_id":str(chunk.id), "chunk_index":str(chunk.chunk_index), 
-        "title":article.title, "content_hash":article.content_hash or "", "version":str(article.version), 
-        "embedding_model":item.embedding_model, "source":"ownerblog"}
+        return {
+            "article_id":str(article.id), 
+            "article_chunk_id":str(chunk.id), 
+            "chunk_index":str(chunk.chunk_index), 
+            "title":article.title, 
+            "content_hash":article.content_hash or "", 
+            "version":str(article.version), 
+            "embedding_model":item.embedding_model, 
+            "embedding_provider": item.embedding_provider,
+            "embedding_dimension": str(item.embedding_dimension),
+            "source": "ownerblog"
+        }
 
     # 删除当前文章不再使用的旧向量
     def _delete_stale_vectors(self, *, article_id:int, current_ids:list[str]) -> None:

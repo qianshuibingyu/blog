@@ -12,31 +12,9 @@ from .errors import SourceValidationError
 
 # 只允许 Markdown 常见结构对应的 HTML 标签
 ALLOWED_TAGS = [
-    "p",
-    "br",
-    "hr",
-    "h1",
-    "h2",
-    "h3",
-    "h4",
-    "h5",
-    "h6",
-    "strong",
-    "em",
-    "del",
-    "blockquote",
-    "ul",
-    "ol",
-    "li",
-    "pre",
-    "code",
-    "table",
-    "thead",
-    "tbody",
-    "tr",
-    "th",
-    "td",
-    "a",
+    "p", "br", "hr", "h1", "h2", "h3", "h4", "h5", "h6",
+    "strong", "em", "del", "blockquote", "ul", "ol", "li",
+    "pre", "code", "table", "thead", "tbody", "tr", "th", "td", "a",
 ]
 
 # 只允许必要属性，拒绝 onclick、style 等执行或任意样式属性
@@ -54,18 +32,8 @@ class PlainTextExtractor(HTMLParser):
     """从安全 HTML 提取保留结构边界的纯文本"""
     # 这些标签结束时补换行，避免段落和标题粘在一起
     BLOCK_TAGS = {
-        "p",
-        "hr",
-        "h1",
-        "h2",
-        "h3",
-        "h4",
-        "h5",
-        "h6",
-        "li",
-        "blockquote",
-        "pre",
-        "tr",
+        "p", "hr", "h1", "h2", "h3", "h4", "h5", "h6",
+        "li", "blockquote", "pre", "tr",
     }
 
     def __init__(self) -> None:

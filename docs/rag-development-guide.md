@@ -429,7 +429,6 @@ cleaned_content
 9. 校验向量数量、有限数值和维度；
 10. 记录 Embedding 失败原因；
 11. 模型或 provider 更换后重建 Chroma collection 并重新索引，禁止混用旧向量。
->>>>>>> 8de5a87733a78acc0970c3d9fbee2a0b78f40c31
 
 ### 本阶段输出
 

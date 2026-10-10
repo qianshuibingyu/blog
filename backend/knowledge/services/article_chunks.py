@@ -54,6 +54,10 @@ def persist_article_chunks(*, article_id: int , text_chunks: list[TextChunk]) ->
             article=article,
             chunk_index=chunk.chunk_index,
             content=chunk.content,
+            content_hash=chunk.content_hash,
+            article_version=int(chunk.version or article.version),
+            section=chunk.section,
+            metadata=chunk.metadata,
             vector_document_id="",
         )
         for chunk in text_chunks

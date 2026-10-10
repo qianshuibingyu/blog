@@ -19,3 +19,13 @@ class CleanedDocument:
     # 清洗后纯文本字符数
     metadata: dict[str, Any] = field(default_factory=dict)
     # 从阶段2继承并补充的来源信息
+
+@dataclass(frozen=True)
+class TextChunk:
+    chunk_index: int
+    content: str
+    content_length: int
+    content_hash: str
+    version: str | int | None
+    section: str
+    metadata: dict[str, Any] = field(default_factory=dict)

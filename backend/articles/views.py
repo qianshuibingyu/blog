@@ -11,6 +11,7 @@ from .serializers import (
     MyArticleSerializer,
 )
 
+from articles.services import cleanup_article_resources
 
 
 # Create your views here.
@@ -114,6 +115,7 @@ class ArticleItemAPIView(APIView):
                 status= 401,
             )
 
+        cleanup_article_resources(article)
         article.delete()
         return Response(status=204)
 

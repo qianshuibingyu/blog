@@ -15,14 +15,13 @@ export async function getArticle(id) {
   return data
 }
 
-export async function askKnowledge(question) {
-  if (useMocks) {
-    return {
-      answer: `这是一个演示回答：你的问题是“${question}”。正式接入后，系统只会检索公开且索引成功的文章。`,
-      resources: mockArticles.filter((article) => article.featured || article.category === "知识库").slice(0, 2),
-    }
+// 定义知识问答请求函数
+export async function askKnowledge(question){
+  const value = question.trim()
+  if (!value){
+    throw new Error("问题不能为空")
   }
-  const { data } = await apiClient.post("/knowledge/ask", { question })
+  const { data } = await apiClient.post("/knowledge/chat", {question: value},)
   return data
 }
 
