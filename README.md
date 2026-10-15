@@ -1,8 +1,8 @@
 # OwnerBlog
 
-个人技术知识库与智能问答平台。普通用户可以创建和提交自己的 Markdown 文章、阅读公开内容并发表评论；管理员负责账号和内容审核。只有审核通过且索引成功的文章才进入公开展示和 Chroma 知识库问答。
+个人技术知识库与智能问答平台。当前支持普通用户创建和提交 Markdown 文章、阅读公开内容，管理员通过 Django Admin 审核账号和文章。评论是规划能力，目前 comments 模块和评论 API 尚未实现。只有审核通过且索引成功的文章才进入公开展示和 Chroma 知识库问答。
 
-> 当前仓库已完成文章模型、数据库 migration、Django Admin、文章公开读取、个人文章草稿管理、提交审核流程和 Vue 前端基础页面。RAG 的数据模型、依赖和配置已准备，但 Markdown 清洗、文本切分、embedding、Chroma 索引、知识问答 API 和审核后的自动发布链路仍待实现。
+> 当前源码已有 Django 账号与文章业务、审核流程，以及知识库内容处理、切分、Embedding、Chroma、检索、回答和 Django 问答 API 的基础实现。它们仍需按 [最终交付路线图](docs/final-delivery-roadmap.md) 完成链路验收；FastAPI 尚未接入。目标是保留 Django 作为账号、文章、审核和状态的权威服务，逐步把知识问答 HTTP 层迁到 FastAPI，不做整体重写。
 
 ## 当前进度
 
@@ -11,12 +11,14 @@
 - Day 2 Phase 2：Django Admin 文章管理、审核服务和审核历史已完成
 - Day 2 Phase 3：公开文章列表/详情、个人文章列表、草稿 CRUD 和提交审核接口已完成
 - Day 2 Phase 4：Vue 文章列表、详情、登录和个人文章管理页面已完成
-- Day 2 Phase 5：后端文章权限与审核测试已完成；当前后端测试 14 项通过，前端生产构建通过
-- 下一阶段：实现最小 RAG 检索闭环，再接入知识问答和审核后的自动发布
+- 当前源码：Django 账号/文章管理、Django Admin、文章审核索引编排和 Django RAG 问答入口均已存在
+- 当前待办：核对端到端链路与测试隔离，补齐版本更新等交付缺口，再按阶段抽取知识服务并迁移 FastAPI
+- 本 README 不记录未经本次执行确认的测试通过数量；验收记录见路线图对应阶段
 
 ## 文档入口
 
 - [项目开发规范](docs/development-specification.md)
+- [最终交付路线图](docs/final-delivery-roadmap.md)
 - [RAG 全链路开发指引](docs/rag-development-guide.md)
 - [Day 1 执行计划](plan/day1.md)
 - [Phase 1 MVP 总体计划](plan/phase1-mvp.md)
@@ -46,31 +48,30 @@
 - Article、ArticleChunk 和审核相关数据模型
 - 文章公开读取、个人草稿管理和提交审核接口
 
-当前尚未完成：
+仍需实现或验收：
 
-- Markdown 清洗和安全渲染服务
-- 按标题/段落切分文章并持久化 ArticleChunk 的服务
-- embedding 模型调用和 Chroma PersistentClient 写入
-- 相似度检索、上下文限制和来源整理
-- `/api/knowledge/chat` 知识问答 API
-- 审核通过后“索引成功才发布”的自动状态联动
-- 前端公开文章和问答页面切换到真实后端数据后的完整联调
+- 审核、索引、失败重试、发布、更新和清理链路的完整验收
+- 外部解析/抽取/模型服务与普通测试隔离
+- 当前向量检索、上下文和来源契约与路线图要求的差距
+- 前端问答已请求 Django `/api/knowledge/chat`；仍需端到端运行验收和异常状态验收
+- 在稳定 service 契约后增加 FastAPI 问答服务，并逐步切换代理
 
-当前前端公开文章接口默认仍使用 mock 数据；设置 `VITE_USE_MOCKS=false` 后才会请求 Django 公开文章接口。
+当前前端公开文章接口默认仍使用 mock 数据；设置 `VITE_USE_MOCKS=false` 后才会请求 Django 公开文章接口。知识问答页面已直接调用 Django `/api/knowledge/chat`。FastAPI 服务目前尚未建立或接入。
 
 ## 技术栈
 
 | 层次 | 技术 | 说明 |
 | --- | --- | --- |
-| 后端 | Python、Django、Django REST Framework | API、管理入口和业务编排 |
+| 业务后端 | Python、Django、Django REST Framework | 账号、文章、评论、审核、数据库迁移和管理入口 |
+| 知识服务（目标） | Python、FastAPI | 目标承载问答 HTTP API；当前仍由 Django 提供，按路线图渐进迁移 |
 | 内容管理 | Django Admin | 管理文章、审核和索引状态；索引成功后才可正式公开 |
 | 数据库 | SQLite | 保存 User、Article 和 ArticleChunk 映射 |
-| 前端 | Vue 3、Vite、Vue Router、Axios | 文章展示、草稿管理和问答页面 |
-| 文档解析 | MinerU | 待接入：解析 PDF 等原始文档为 Markdown/JSON |
-| 结构化抽取 | LangExtract | 待接入：抽取章节、主题、实体和原文位置 metadata |
-| 向量库 | Chroma PersistentClient | 待接入：保存文章向量和检索 metadata |
-| 模型 | OpenAI-compatible 模型服务 | 待接入：embedding 和回答生成 |
-| 测试 | pytest | 已有文章权限/审核测试，后续补充 RAG 关键测试 |
+| 前端 | Vue 3、Vite、Vue Router、Axios | 文章展示、草稿管理和 Django 问答接口调用 |
+| 文档解析 | MinerU | 已有适配代码；文件导入和真实解析链路仍需验收 |
+| 结构化抽取 | LangExtract | Markdown 来源处理会调用适配器；抽取结果质量和失败降级仍需验收 |
+| 向量库 | Chroma PersistentClient | 已有写入和检索实现，版本、并发和生命周期仍需验收 |
+| 模型 | OpenAI-compatible 模型服务、Sentence Transformers | 已有 Embedding/回答适配基础，外部服务链路仍需验收 |
+| 测试 | pytest、pytest-django | 源码已有文章权限/审核及 RAG 各层单元/API 测试；尚需固定 RAG 质量评估与 FastAPI/私密权限测试 |
 
 ## 规划目录
 
@@ -105,9 +106,9 @@ ownerblog/
 └─ .gitignore
 ```
 
-普通用户通过 Vue + REST API 登录、投稿和管理自己的内容；管理员通过 Django Admin 管理账号及全量文章、评论。Phase 1 不实现公开注册，也不实现 `/api/admin/*` 审核 API；管理员审核、下架、删除和索引重建均通过 Django Admin 或 management command 完成。
+普通用户通过 Vue + REST API 登录、投稿和管理自己的文章；管理员通过 Django Admin 管理账号和文章。Phase 1 不实现公开注册，也不实现 `/api/admin/*` 审核 API；管理员审核、下架、删除和索引重建均通过 Django Admin 或 management command 完成。评论功能目前尚未实现。
 
-Phase 1 前端页面：`/` 公开文章列表、`/articles/{id}` 文章详情、`/my-articles` 当前用户文章管理。`/knowledge` 页面已经存在，但后端知识库问答接口仍待按照 [RAG 全链路开发指引](docs/rag-development-guide.md) 接入。
+Phase 1 前端页面：`/` 公开文章列表、`/articles/{id}` 文章详情、`/my-articles` 当前用户文章管理。`/knowledge` 页面和 Django 问答接口均已存在；真实联调与交付验收状态按 [RAG 全链路开发指引](docs/rag-development-guide.md) 和路线图确认。FastAPI 是目标迁移架构，不是当前已运行服务。
 
 ## 前置环境
 
@@ -306,7 +307,7 @@ python manage.py runserver 127.0.0.1:8000
 ```powershell
 cd frontend
 pnpm install --frozen-lockfile
-pnpm dev --host 127.0.0.1
+pnpm dev --host 0.0.0.0
 ```
 
 启动后访问：
@@ -347,7 +348,7 @@ python manage.py runserver 127.0.0.1:8000
 ```powershell
 cd frontend
 pnpm install --frozen-lockfile
-pnpm dev --host 127.0.0.1
+pnpm dev --host 0.0.0.0
 ```
 
 ### 配置
@@ -361,7 +362,7 @@ VITE_API_BASE_URL=/api
 VITE_USE_MOCKS=false
 ```
 
-前端文章列表和详情使用 Django API；知识问答页面仍保留 mock 逻辑，直到后续知识库接口完成。
+前端文章列表和详情在 `VITE_USE_MOCKS=false` 时使用 Django API。知识问答页面当前直接向 Django `/api/knowledge/chat` 发送真实请求；FastAPI 尚未接入。
 
 ### Health
 
@@ -385,7 +386,7 @@ VITE_USE_MOCKS=false
 
 ### 当前接口基线
 
-文章公开读取、个人草稿管理、提交审核和认证接口已经有后端实现；管理员审核主要通过 Django Admin 完成。RAG 索引和知识问答接口仍属于待开发能力：
+文章公开读取、个人草稿管理、提交审核和认证接口已有实现；管理员审核主要通过 Django Admin 完成。RAG 索引与问答的 Django 实现已经存在，但仍需按路线图验收；FastAPI 接口尚未迁移：
 
 | 方法 | 路径 | 用途 | 登录要求 |
 | --- | --- | --- | --- |
@@ -399,14 +400,14 @@ VITE_USE_MOCKS=false
 | `POST` | `/api/articles` | 创建自己的文章草稿 | 需要登录 |
 | `PATCH/DELETE` | `/api/articles/{id}` | 修改/删除自己的文章，管理员可管理全部 | owner/admin |
 | `POST` | `/api/articles/{id}/submit-review` | 提交文章审核 | owner/admin |
-| `GET/POST` | `/api/articles/{id}/comments` | 查看通过评论/创建评论 | 读公开；写需登录 |
-| `DELETE` | `/api/comments/{id}` | 删除自己的评论，管理员可删除全部 | owner/admin |
+| `GET/POST` | `/api/articles/{id}/comments` | 计划中的评论列表/创建接口；当前未实现、未注册 | 计划：读公开；写需登录 |
+| `DELETE` | `/api/comments/{id}` | 计划中的评论删除接口；当前未实现、未注册 | 计划：owner/admin |
 | `POST` | `/api/admin/articles/{id}/approve` | Future：管理员通过文章并触发索引 | admin |
 | `POST` | `/api/admin/articles/{id}/offline` | Future：管理员下架文章 | admin |
 | `GET` | `/api/health` | 检查后端和代理链路 | 不需要 |
-| `POST` | `/api/knowledge/chat` | 待实现：单轮知识库问答，允许匿名访问 | 不需要 |
+| `POST` | `/api/knowledge/chat` | 当前 Django 问答入口；匿名访问公开且已索引文章 | 不需要 |
 
-`/admin/` 是 Django Session/staff 管理入口，不属于 Vue 公开 API。完整请求/响应和权限规则见项目开发规范。
+评论相关路径目前不在 `backend/config/urls.py` 中注册，`comments` 模型和视图也仍为空壳。`/admin/` 是 Django Session/staff 管理入口，不属于 Vue 公开 API。FastAPI 目标路由和最终前端代理路径待迁移阶段固定；完整请求/响应和权限规则见项目开发规范及路线图。
 
 ### Health 验证
 

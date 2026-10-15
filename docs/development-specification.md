@@ -1,6 +1,6 @@
 # OwnerBlog 项目开发规范
 
-- 文档状态：`planned`（项目技术基线，代码实现尚未开始）
+- 文档状态：`target specification`；代码现状以本文的源码状态说明和最终交付路线图为准
 - 适用范围：OwnerBlog 全项目及后续 Phase
 - Phase 1 实现范围：[Phase 1 MVP 计划](../plan/phase1-mvp.md)
 - 当前执行任务：[Day 1 计划](../plan/day1.md)
@@ -70,7 +70,7 @@ Phase 1 只创建普通用户和管理员两类产品角色。管理员通过 Dj
 
 ### 2.2 Phase 1 适用范围
 
-Phase 1 必须完成认证、普通用户投稿、文章审核、审核后索引和公开展示、评论基础能力、对象级权限、站内系统通知、无需登录即可调用的公开知识库单轮问答、来源返回和基础异常提示。问答不因登录而扩大可见范围；只有管理员审核通过、embedding 成功且 Chroma 写入成功的文章才能通过公开门禁进入公开 API 和知识库。具体范围以 `plan/phase1-mvp.md` 为准。
+Phase 1 必须完成认证、普通用户投稿、文章审核、审核后索引和公开展示、评论基础能力、对象级权限、站内系统通知、无需登录即可调用的公开知识库单轮问答、来源返回和基础异常提示。Phase 1 问答不因登录而扩大可见范围；只有管理员审核通过、embedding 成功且 Chroma 写入成功的文章才能通过公开门禁进入公开 API 和知识库。最终交付路线图在 Phase 1 之后增加私密知识库和用户权限检索，必须先完成共享认证、知识库成员授权和检索最终过滤。Phase 1 具体范围以 `plan/phase1-mvp.md` 为准，最终交付范围以 `docs/final-delivery-roadmap.md` 为准。
 
 Phase 1 仍不做注册、复杂搜索、点赞收藏、邮件/短信通知、Agent、多轮对话、流式输出、Celery、Chroma HTTP Server 和完整 Docker Compose。
 
@@ -84,14 +84,16 @@ Phase 1 仍不做注册、复杂搜索、点赞收藏、邮件/短信通知、Ag
 flowchart LR
     Browser["浏览器"]
     Vue["Vue 3 + Vite<br/>Router / Views / Components"]
-    Axios["Axios API Client<br/>相对路径 /api"]
+    Axios["Axios API Client<br/>当前 /api；目标分路由代理"]
     Proxy["Vite Proxy<br/>本地开发转发"]
-    Django["Django + DRF<br/>路由 / View / Serializer"]
+    Django["Django + DRF<br/>账号 / 文章 / 评论 / 审核"]
+    FastAPI["FastAPI（目标）<br/>知识库问答 / 检索 / 模型适配"]
+    InternalAPI["Django 内部数据与认证 API<br/>目标契约，尚未实现"]
     Admin["Django Admin<br/>管理员内容管理"]
     Accounts["accounts<br/>User / Auth 规划"]
     Articles["articles<br/>Article / 文章 API / 所有权"]
-    Comments["comments<br/>评论 API / 审核"]
-    Knowledge["knowledge<br/>索引 / 检索 / 问答"]
+    Comments["comments（规划中）<br/>评论 API / 审核"]
+    Knowledge["Django knowledge<br/>索引编排 / ArticleChunk"]
     SQLite[("SQLite<br/>User / Article / ArticleChunk")]
     Chroma[("Chroma PersistentClient<br/>向量与 metadata")]
     Model["OpenAI-compatible Chat/LangExtract Service"]
@@ -101,6 +103,7 @@ flowchart LR
     Vue --> Axios
     Axios --> Proxy
     Proxy --> Django
+    Proxy --> FastAPI
     Admin --> Django
     Django --> Accounts
     Django --> Articles
@@ -110,8 +113,12 @@ flowchart LR
     Articles --> SQLite
     Comments --> SQLite
     Knowledge --> SQLite
-    Knowledge --> Chroma
+    Knowledge -->|"现状，迁移前"| Chroma
     Knowledge --> Model
+    FastAPI --> InternalAPI
+    InternalAPI --> SQLite
+    FastAPI -->|"目标，单一所有者"| Chroma
+    FastAPI --> Model
 ```
 
 
@@ -124,21 +131,25 @@ flowchart LR
 flowchart TB
     Client["本地浏览器"]
     Frontend["Vite Dev Server<br/>localhost:5173"]
-    Backend["Django Dev Server<br/>127.0.0.1:8000"]
+    Django["Django Dev Server<br/>127.0.0.1:8000"]
+    FastAPI["FastAPI Dev Server<br/>127.0.0.1:8001（目标）"]
     DB[("SQLite 文件")]
     Vector[("Chroma 持久化目录")]
     External["外部 OpenAI-compatible 服务"]
 
     Client --> Frontend
-    Frontend -->|"/api Proxy"| Backend
-    Backend --> DB
-    Backend --> Vector
-    Backend --> External
+    Frontend -->|"/api：账号、文章、评论"| Django
+    Frontend -->|"/knowledge-api：问答"| FastAPI
+    Django --> DB
+    Django --> Vector
+    FastAPI -->|"身份/权限/文章数据（目标内部契约）"| Django
+    FastAPI --> Vector
+    FastAPI --> External
 ```
 
 
 
-当前 `backend/` 和 `frontend/` 已创建并可运行。Django 后端、Vue/Vite 前端、Vite Proxy、认证基础能力、文章模型、文章 API、个人草稿管理、提交审核和 `/api/health` 联调链路已经完成；ArticleChunk 数据模型和 RAG 配置已准备。Markdown 清洗、切分、embedding、Chroma、问答 API 和审核后的自动索引发布仍按后续步骤接入。
+目标边界：Django 是账号、文章、评论、审核和业务数据库迁移的唯一权威服务；FastAPI 承载知识库问答、检索、Embedding、模型和知识索引能力，不建立第二份用户或文章主数据。当前代码仍由 Django 承载知识服务和问答 API，FastAPI 尚未迁移完成。目标方案建议由 Django 内部 API 提供身份、权限范围和文章/片段数据；FastAPI 成为 Chroma 的唯一读写进程。Django 在审核事务提交后通过内部契约触发 FastAPI 索引，索引结果再由 Django 校验并写回文章状态。此内部契约、ArticleChunk 持久化归属及失败重试必须先经过 Stage 0 设计验收。迁移采用渐进方式：先核对并稳定现有索引与问答闭环，再抽取不依赖 HTTP 框架的知识服务，然后增加 FastAPI 适配层并切换前端代理；迁移完成前 Django 保留兼容入口。两个服务不能各自修改文章生命周期状态，也不能同时直接打开同一嵌入式 Chroma 目录。
 
 ## 4. 前后端边界与交互契约
 
@@ -151,11 +162,8 @@ flowchart TB
 ```text
 Vue 页面/组件
   -> Axios API Client
-      -> /api HTTP/JSON 契约
-          -> Django/DRF Router
-              -> Serializer / Permission
-                  -> Domain Service
-                      -> SQLite / Chroma / Model Service
+      ├─ /api：Django/DRF -> accounts / articles / comments -> SQLite
+      └─ /knowledge-api：FastAPI -> knowledge service -> Django 内部认证/数据 API / Chroma / Model Service
 ```
 
 
@@ -229,11 +237,12 @@ Vue -> Axios -> Django/DRF -> 公开门禁查询 -> SQLite -> JSON -> Vue 渲染
 知识库问答：
 
 ```text
-Vue -> Axios -> Django/DRF -> 待实现的公开文章片段检索 -> embedding/Chroma
-     -> GPT-compatible Model -> answer + sources -> Vue 渲染
+当前：Vue -> Axios -> Django/DRF -> 知识服务 -> Embedding/Chroma/回答模型 -> answer + sources -> Vue
+目标：Vue -> Axios -> FastAPI -> 知识服务 -> Django 内部认证/授权/文章数据 API
+                                      -> FastAPI 独占 Chroma 与模型适配
 ```
 
-当前 `/knowledge` 页面和前端请求封装已存在，但后端问答接口尚未实现。
+当前 `/knowledge` 页面、Django 问答 API 和 RAG 服务实现均已存在，仍需完成端到端验收。FastAPI 路由和 Django 内部认证/数据 API 尚未实现。
 
 文章删除：
 
@@ -282,7 +291,7 @@ Phase 1 的核心完成条件是文章审核、索引、公开门禁和问答链
 
 ### 4.8 角色与权限矩阵
 
-本矩阵是 Phase 1 唯一的产品角色权限定义。匿名访客是访问状态，不是账号角色；开发者维护身份和 Django `superuser` 能力不属于产品权限模型。
+本矩阵是 Phase 1 唯一的产品角色权限定义。匿名访客是访问状态，不是账号角色；开发者维护身份和 Django `superuser` 能力不属于产品权限模型。表中能力是否已实现，以[最终交付路线图](final-delivery-roadmap.md)及其对应验收为准。
 
 
 | 能力              | 匿名访客   | 普通用户     | 管理员     |
@@ -309,7 +318,7 @@ Phase 1 的核心完成条件是文章审核、索引、公开门禁和问答链
 - 后端必须再次执行登录认证、角色校验、资源存在性查询、所有权校验、状态校验和关联关系校验。
 - 普通用户不能提交或覆盖 `author`、`status`、`index_status`、审核人和角色权限字段。
 - 管理员通过 Django Admin 执行审核、删除、索引查看和索引重建，不创建独立管理前端。
-- 问答接口对三类访问者均开放，但所有访问者只能检索通过公开门禁的文章。
+- Phase 1 问答接口允许匿名访问且只检索公开文章；最终交付中，登录用户可检索其有权访问的私密知识库，匿名访问仍限公开范围。
 
 
 
@@ -319,7 +328,8 @@ Phase 1 的核心完成条件是文章审核、索引、公开门禁和问答链
 | 层次       | 技术                              | 状态      | 决策                                          |
 | -------- | ------------------------------- | ------- | ------------------------------------------- |
 | 语言       | Python 3.x                      | planned | 后端与 AI 能力统一使用 Python 生态                     |
-| 后端       | Django + Django REST Framework  | phase1  | 使用 Django Admin、ORM 和清晰的 REST API 边界        |
+| 业务后端 | Django + Django REST Framework | phase1 | 账号、文章、评论、审核、Django Admin 和业务数据权威服务 |
+| 知识服务 | FastAPI | target | 最终交付承载问答、检索和模型 API；通过明确的内部契约访问 Django 权限/文章数据 |
 | 前端       | Vue 3 + Vite                    | phase1  | 使用单文件组件和本地开发服务器                             |
 | 路由       | Vue Router                      | phase1  | 管理文章列表、详情和问答页面路由                            |
 | HTTP 客户端 | Axios                           | phase1  | 统一 API 请求和错误处理                              |
@@ -327,7 +337,7 @@ Phase 1 的核心完成条件是文章审核、索引、公开门禁和问答链
 | 数据库      | SQLite                          | phase1  | 降低本地开发和学习成本，使用 Django migrations 建表         |
 | 文档解析    | MinerU                           | planned | 解析 PDF 等原始文档并输出 Markdown/JSON                         |
 | 结构化抽取  | LangExtract                     | planned | 抽取章节、主题、实体和原文位置 metadata                        |
-| 向量库      | Chroma PersistentClient         | phase1  | 本地嵌入式向量存储，不作为高并发生产方案                        |
+| 向量库      | Chroma PersistentClient         | phase1  | 当前由 Django 代码访问；迁移后由 FastAPI 单一进程拥有，不作为高并发生产方案 |
 | 模型       | OpenAI-compatible SDK/API       | phase1  | 通过环境变量配置服务地址、密钥和模型                          |
 | 测试       | pytest、pytest-django            | phase1 | 已有文章权限、审核和公开读取测试；RAG 关键测试待补齐                          |
 | 日志       | Python logging / Django logging | phase1  | 记录索引、模型调用和错误分类，不记录密钥                        |
@@ -357,7 +367,7 @@ Phase 1 的核心完成条件是文章审核、索引、公开门禁和问答链
 | ---------------- | ------------------- | ------------------- | ------ |
 | `/`              | `ArticleListView`   | 获取并展示已发布文章列表        | 已实现 |
 | `/articles/:id`  | `ArticleDetailView` | 获取并展示文章详情和 Markdown | 已实现 |
-| `/knowledge`     | `KnowledgeView`     | 提交问题、展示回答和来源        | 页面已实现，后端问答待接入 |
+| `/knowledge`     | `KnowledgeView`     | 向 Django 问答 API 提交问题、展示回答和来源 | 页面和 API 调用已实现；FastAPI 未接入，端到端仍待验收 |
 | `/login`         | `LoginView`         | 登录和会话状态             | 已实现 |
 | `/my-articles`   | `MyArticlesView`    | 创建、编辑、删除草稿并提交审核 | 已实现 |
 
@@ -405,11 +415,10 @@ Phase 1 的核心完成条件是文章审核、索引、公开门禁和问答链
 ### 6.1 分层约定
 
 ```text
-URL Router
-  -> View / APIView
-      -> Serializer / 参数校验
-          -> Domain Service
-              -> ORM / Chroma / LLM Adapter
+HTTP Router（Django 或 FastAPI）
+  -> HTTP 参数校验 / 认证适配
+      -> 框架无关的 Domain Service
+          -> 数据访问 / Chroma / LLM Adapter
 ```
 
 - Router：只负责 URL 到 view 的映射。
@@ -455,7 +464,7 @@ View 不直接堆放 Markdown 切分、Chroma 操作、prompt 拼接和重试逻
 
 #### `comments`
 
-规划文件职责：
+目标职责（当前模块尚未实现）：
 
 ```text
 comments/models.py        Comment / moderation fields
@@ -466,7 +475,7 @@ comments/admin.py         管理员审核入口
 comments/tests.py         评论审核和越权测试
 ```
 
-只有已通过、所属文章通过公开门禁的评论才展示；评论提交后不能由普通用户修改，删除后不可恢复。
+当前 `comments/models.py` 和 `comments/views.py` 仍为空壳，没有 Comment 模型、评论 migration、URL 路由或 API。以上为目标职责；只有已通过且所属文章通过公开门禁的评论才应展示。评论功能需在代码和路由落地后重新验收。
 
 #### `knowledge`
 
@@ -476,11 +485,12 @@ comments/tests.py         评论审核和越权测试
 knowledge/models.py     ArticleChunk（phase1）
 knowledge/services.py   清洗、切分、索引、更新、删除和检索
 knowledge/llm.py        embedding 和 chat 模型适配
-knowledge/views.py      问答 API 编排
+knowledge/api.py        当前 Django 兼容问答入口（迁移期）
+knowledge_api/          目标 FastAPI HTTP 适配层
 knowledge/tests.py      RAG 关键测试
 ```
 
-`knowledge` 目录目前已完成 `ArticleChunk` 数据模型和 migration；下面的原始文档解析、结构化抽取、service、模型适配器、问答 API 和 RAG 测试仍是待实现文件。建议按 [RAG 全链路开发指引](rag-development-guide.md) 的顺序逐步补齐：
+当前 `backend/knowledge/` 已有内容解析、清洗切分、ArticleChunk 持久化、Embedding、Chroma、检索、回答和 Django 问答入口等实现。它是迁移起点，不代表所有链路已验收。后续先按 [RAG 全链路开发指引](rag-development-guide.md) 核对实现和验收缺口，再抽取框架无关服务并由 FastAPI 暴露问答 API。Django 继续拥有文章状态、审核和用户授权的最终写入权；FastAPI 不得自行发布或下架文章。最终交付还要支持私密知识库，但必须遵守路线图中先完成共享认证和服务边界的门禁。
 
 #### `Django Admin`
 
@@ -768,7 +778,7 @@ AND index_status = indexed
 
 `GET /api/articles` 和 `GET /api/articles/{id}` 都调用公开门禁查询，不能只判断 `status=published`。评论公开还必须额外满足 `comment.status=approved`。匿名用户只能通过 GET 读取公开文章和评论；所有写入接口要求登录。
 
-`POST /api/knowledge/chat` 允许匿名用户访问，但检索集合只能包含通过公开门禁的文章片段。回答和 `sources` 必须全部来自公开文章；草稿、待审核、索引失败、下架或已删除文章不得参与检索，也不得出现在来源中。登录用户与匿名用户使用同一公开检索范围，登录不会扩大问答可见范围。
+`POST /api/knowledge/chat` 当前允许匿名访问，Phase 1 检索集合只包含通过公开门禁的文章片段。最终交付中，登录请求还可包含用户有权访问的私密知识库片段；FastAPI 必须通过 Django 认证/授权契约取得身份和检索范围。草稿、待审核、索引失败、下架、已删除、版本不一致或用户无权访问的片段不得进入上下文或来源。
 
 索引流程必须具备幂等性：同一文章重复索引不应留下旧片段或重复 chunk；embedding 和 Chroma 失败必须分别记录进度、错误和管理员通知，不能静默标记为成功。评论不进入知识库索引。
 
@@ -914,9 +924,9 @@ Django 停止时：Proxy 连接失败 → Axios rejected → Vue 显示 error。
 
 | 方法       | 路径                            | 用途            | 登录要求        |
 | -------- | ----------------------------- | ------------- | ----------- |
-| `GET`    | `/api/articles/{id}/comments` | 已通过评论列表       | 不需要         |
-| `POST`   | `/api/articles/{id}/comments` | 创建评论并进入审核     | 需要登录        |
-| `DELETE` | `/api/comments/{id}`          | 删除自己的评论或管理员删除 | owner/admin |
+| `GET`    | `/api/articles/{id}/comments` | 计划：已通过评论列表；当前未实现/未注册 | 计划：不需要 |
+| `POST`   | `/api/articles/{id}/comments` | 计划：创建评论并进入审核；当前未实现/未注册 | 计划：需要登录 |
+| `DELETE` | `/api/comments/{id}`          | 计划：删除评论；当前未实现/未注册 | 计划：owner/admin |
 
 
 
@@ -1070,7 +1080,7 @@ Django 停止时：Proxy 连接失败 → Axios rejected → Vue 显示 error。
 
 
 
-### 10.1 Markdown 处理（目标能力，当前待实现）
+### 10.1 Markdown 处理（已有基础实现，验收待完成）
 
 - 保存 Markdown 原文，不在写入时破坏用户内容。
 - 展示前执行安全渲染，禁止未经清洗的 HTML 注入。
@@ -1079,7 +1089,7 @@ Django 停止时：Proxy 连接失败 → Axios rejected → Vue 显示 error。
 
 
 
-### 10.2 Chunk 与 embedding（目标能力，当前待实现）
+### 10.2 Chunk 与 embedding（已有基础实现，验收待完成）
 
 - 以标题和段落为优先切分边界。
 - 使用 `chunk overlap` 降低跨段语义丢失。
@@ -1091,7 +1101,7 @@ Django 停止时：Proxy 连接失败 → Axios rejected → Vue 显示 error。
 
 
 
-### 10.3 Chroma 索引（目标能力，当前待实现）
+### 10.3 Chroma 索引（已有基础实现，迁移边界待完成）
 
 - 写入文档时保存文章 ID、chunk index、标题等 metadata。
 - 通过 `vector_document_id` 建立 Chroma 与 ArticleChunk 映射。
@@ -1101,7 +1111,7 @@ Django 停止时：Proxy 连接失败 → Axios rejected → Vue 显示 error。
 
 
 
-### 10.4 RAG 问答（目标能力，当前待实现）
+### 10.4 RAG 问答（Django 入口已存在，FastAPI 迁移待完成）
 
 - 先检索、过滤和限制上下文，再调用模型。
 - 只把达到阈值的片段交给模型。

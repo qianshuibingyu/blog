@@ -253,8 +253,10 @@ Vue 3 + Vite
 
 处理方式：使用环境变量配置服务地址，增加超时、异常提示和本地测试数据。
 
-## 11. 参考资料与执行文档关系
+## 11. 参考资料与现行文档
 
-- 本文件：背景调研、方案比较和技术决策参考
-- `plan/project-plan.md`：项目总体阶段路线
-- `plan/phase1-mvp.md`：当前 MVP 的详细实施步骤和验收清单
+- 本文件：历史背景调研、方案比较和技术决策参考，不作为现行依据。
+- [项目开发规范](docs/development-specification.md)：稳定的架构、数据/API、安全与质量约定。
+- [最终交付路线图](docs/final-delivery-roadmap.md)：当前交付范围、阶段依赖、验收标准和进度。
+- [RAG 全链路开发指南](docs/rag-development-guide.md)：RAG 专题实现与验收流程。
+- [README](README.md)：项目概览、快速启动和文档导航。
